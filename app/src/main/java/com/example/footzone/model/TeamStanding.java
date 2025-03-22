@@ -20,6 +20,13 @@ public class TeamStanding {
         this.isHeader = false;
     }
 
+    public TeamStanding(String name, boolean isHeader, int points) {
+        this.name = name;
+        this.points = points;
+        this.isHeader = isHeader;
+    }
+
+
     public String getName() {
         return name;
     }

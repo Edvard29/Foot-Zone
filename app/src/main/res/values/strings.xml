@@ -2,4 +2,14 @@
     <string name="app_name">Foot Zone</string>
     <string name="navigation_drawer_open">Открыть меню</string>
     <string name="navigation_drawer_close">Закрыть меню</string>
+
+        <string-array name="leagues">
+            <item>Английская Премьер-Лига</item>
+            <item>Ла Лига</item>
+            <item>Серия A</item>
+            <item>Бундеслига</item>
+            <item>Лига 1</item>
+        </string-array>
+
+
 </resources>

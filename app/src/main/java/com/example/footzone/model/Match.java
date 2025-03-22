@@ -1,17 +1,31 @@
 package com.example.footzone.model;
+
 public class Match {
+    private int id;
     private String date;
     private String homeTeam;
     private String awayTeam;
-    private String homeGoals;
-    private String awayGoals;
+    private int homeScore;
+    private int awayScore;
+    private String status;
 
-    public Match(String date, String homeTeam, String awayTeam, String homeGoals, String awayGoals) {
-        this.date = date;
+    // Конструктор с шестью параметрами
+    public Match(String homeTeam, String awayTeam, String date, int homeScore, int awayScore, String status) {
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
-        this.homeGoals = homeGoals;
-        this.awayGoals = awayGoals;
+        this.date = date;
+        this.homeScore = homeScore;
+        this.awayScore = awayScore;
+        this.status = status;
+    }
+
+    // ✅ Getters and setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getDate() {
@@ -26,11 +40,23 @@ public class Match {
         return awayTeam;
     }
 
-    public String getHomeGoals() {
-        return homeGoals;
+    public int getHomeGoals() {
+        return homeScore;
     }
 
-    public String getAwayGoals() {
-        return awayGoals;
+    public int getAwayGoals() {
+        return awayScore;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    // ✅ Форматированный счёт
+    public String getFormattedScore() {
+        if (status == null || status.equals("NS")) {
+            return "-";
+        }
+        return homeScore + " : " + awayScore;
     }
 }

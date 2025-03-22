@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
         <color name="background_color">#1E1E1E</color>
-        <color name="card_background">#2C2C2C</color>
         <color name="white">#FFFFFF</color>
         <color name="black">#000000</color>
         <color name="dark_gray">#AAAAAA</color>
@@ -9,4 +8,21 @@
         <color name="green">#4CAF50</color>
         <color name="teal_700">#00796B</color>
         <color name="golden_yellow">#FFB81C</color>
+        <color name="background">#F4F4F4</color> <!-- Фон -->
+        <color name="toolbar_color">#2C3E50</color> <!-- Цвет тулбара -->
+        <color name="navigation_menu_background">#34495E</color> <!-- Фон меню навигации -->
+        <color name="button_color">#E74C3C</color> <!-- Цвет кнопок -->
+        <!-- Цвет фона карточки -->
+        <color name="card_background">#F5F5F5</color>
+
+        <!-- Цвет текста для даты -->
+        <color name="date_text_color">#9E9E9E</color>
+
+        <!-- Цвет текста для информации о командах -->
+        <color name="team_info_text_color">#212121</color>
+
+        <!-- Дополнительные цвета -->
+        <color name="highlight_color">#FF5722</color>
+        <color name="accent_color">#388E3C</color>
+
 </resources>

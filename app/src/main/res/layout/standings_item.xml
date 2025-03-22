@@ -47,5 +47,6 @@
             android:textColor="@color/golden_yellow"
             android:ellipsize="end"
             android:maxLines="1" />
+
     </LinearLayout>
 </LinearLayout>

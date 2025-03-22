@@ -43,7 +43,10 @@ public class StandingsActivity extends AppCompatActivity {
                         JSONObject team = leagueStandings.getJSONObject(i);
                         String teamName = team.getJSONObject("team").getString("name");
                         int rank = team.getInt("rank");
-                        standings.add(new TeamStanding(rank + ". " + teamName, false));
+                        int points = team.getInt("points");
+                        standings.add(new TeamStanding(rank + ". " + teamName, false, points));
+
+
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

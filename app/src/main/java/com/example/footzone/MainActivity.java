@@ -2,27 +2,23 @@ package com.example.footzone;
 
 import android.os.Bundle;
 import android.util.Log;
-
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.footzone.adapter.MatchAdapter;
 import com.example.footzone.model.Match;
 import com.example.footzone.network.ApiClient;
+import com.example.footzone.network.ApiResponseCallback;
 import com.example.footzone.network.FootballApi;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MainActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private MatchAdapter matchAdapter;
     private List<Integer> topLeagues;
-    private ExecutorService executorService = Executors.newFixedThreadPool(3); // Оптимизированные потоки
+    private final List<Match> allMatches = new ArrayList<>();
 
     @Override
     protected int getLayoutResourceId() {
@@ -45,33 +41,46 @@ public class MainActivity extends BaseActivity {
     private void fetchMatches() {
         Log.d("MainActivity", "Fetching football data...");
 
-        executorService.execute(() -> {
-            ArrayList<Match> allMatches = new ArrayList<>();
-
-            for (int leagueId : topLeagues) {
-                String jsonData = ApiClient.getMatches(leagueId); // Теперь API должен использовать сезон 2024
-                if (jsonData != null) {
+        for (int leagueId : topLeagues) {
+            ApiClient.getMatches(leagueId, new ApiResponseCallback() {
+                @Override
+                public void onSuccess(String jsonData) {
                     Log.d("MainActivity", "Fetched data for league " + leagueId);
-                    ArrayList<Match> matches = FootballApi.parseMatches(jsonData);
 
-                    if (matches != null) {
-                        allMatches.addAll(matches);
-                    } else {
+                    List<Match> matches = FootballApi.parseMatches(jsonData);
+
+                    if (matches == null) {
                         Log.e("MainActivity", "Error parsing matches for league " + leagueId);
+                        return;
                     }
-                } else {
-                    Log.e("MainActivity", "No data received for league " + leagueId);
+
+                    List<Match> filteredMatches = new ArrayList<>();
+                    for (Match match : matches) {
+                        if ("NS".equals(match.getStatus()) || "FT".equals(match.getStatus())) {
+                            filteredMatches.add(match);
+                        }
+                    }
+
+                    runOnUiThread(() -> {
+                        allMatches.addAll(filteredMatches);
+                        updateRecyclerView(allMatches);
+                    });
                 }
-            }
 
-            Log.d("MainActivity", "Total matches fetched: " + allMatches.size());
+                @Override
+                public void onFailure(String errorMessage) {
+                    Log.e("MainActivity", "Error fetching data for league " + leagueId + ": " + errorMessage);
+                }
+            });
+        }
+    }
 
-            if (!allMatches.isEmpty()) {
-                runOnUiThread(() -> {
-                    matchAdapter = new MatchAdapter(allMatches);
-                    recyclerView.setAdapter(matchAdapter);
-                });
-            }
-        });
+    private void updateRecyclerView(List<Match> matches) {
+        if (matchAdapter == null) {
+            matchAdapter = new MatchAdapter(matches);
+            recyclerView.setAdapter(matchAdapter);
+        } else {
+            matchAdapter.notifyDataSetChanged();
+        }
     }
 }

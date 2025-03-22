@@ -14,7 +14,8 @@
     <item
         android:id="@+id/nav_standigs"
         android:title="Таблицы"
-        android:icon="@drawable/ic_table"/>
+        android:icon="@drawable/ic_table"
+        android:textColor="#FFFFFF"/>
     <item
         android:id="@+id/nav_squad"
         android:title="Составы"
@@ -27,4 +28,12 @@
         android:id="@+id/nav_select_team"
         android:title="Выбрать команду"
         android:icon="@drawable/ic_team"/>
+    <item
+        android:id="@+id/nav_scorers"
+        android:title="Бомбардиры"
+        android:icon="@drawable/ic_scorers"/>
+    <item
+        android:id="@+id/nav_assists"
+        android:title="Ассистенты"
+        android:icon="@drawable/ic_assist"/>
 </menu>

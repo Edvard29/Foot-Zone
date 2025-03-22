@@ -1,66 +1,57 @@
 package com.example.footzone.network;
 
-
-
 import android.util.Log;
-
 import com.example.footzone.model.NewsItem;
 import com.example.footzone.model.TeamStanding;
 import com.example.footzone.model.Match;
-import com.example.footzone.model.TransferItem;
+import com.example.footzone.model.Transfer;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Collections;
-
-import java.util.Comparator;
 public class FootballApi {
-    public static ArrayList<Match> parseMatches(String jsonData) {
-        ArrayList<Match> matches = new ArrayList<>();
+    public static List<Match> parseMatches(String jsonData) {
+        List<Match> matches = new ArrayList<>();
+
         try {
             JSONObject jsonObject = new JSONObject(jsonData);
-            JSONArray response = jsonObject.optJSONArray("response");
+            JSONArray responseArray = jsonObject.getJSONArray("response");
 
-            Log.d("ParseMatches", "Response Length: " + response.length());  // Логируем количество матчей
+            for (int i = 0; i < responseArray.length(); i++) {
+                JSONObject matchObject = responseArray.getJSONObject(i);
+                JSONObject teams = matchObject.getJSONObject("teams");
+                JSONObject goals = matchObject.getJSONObject("goals");
+                JSONObject score = matchObject.getJSONObject("score");
 
-            if (response != null) {
-                for (int i = 0; i < Math.min(50, response.length()); i++) {
-                    JSONObject matchObj = response.optJSONObject(i).optJSONObject("fixture");
-                    if (matchObj != null) {
-                        String date = matchObj.optString("date", "Unknown Date");
-                        JSONObject teams = response.optJSONObject(i).optJSONObject("teams");
-                        String home = teams != null ? teams.optJSONObject("home").optString("name", "Unknown Team") : "Unknown Team";
-                        String away = teams != null ? teams.optJSONObject("away").optString("name", "Unknown Team") : "Unknown Team";
-                        JSONObject goals = response.optJSONObject(i).optJSONObject("goals");
-                        String homeGoals = goals != null && !goals.isNull("home") ? String.valueOf(goals.optInt("home", 0)) : "-";
-                        String awayGoals = goals != null && !goals.isNull("away") ? String.valueOf(goals.optInt("away", 0)) : "-";
+                // Получаем дату матча
+                String date = matchObject.getJSONObject("fixture").getString("date");
 
-                        // Логируем данные каждого матча
-                        Log.d("MatchData", "Match " + i + ": " + home + " vs " + away + " | " + date);
+                String homeTeam = teams.getJSONObject("home").getString("name");
+                String awayTeam = teams.getJSONObject("away").getString("name");
 
-                        // Добавляем матч в список
-                        matches.add(new Match(date, home, away, homeGoals, awayGoals));
-                    }
+                int homeGoals = goals.isNull("home") ? 0 : goals.getInt("home");
+                int awayGoals = goals.isNull("away") ? 0 : goals.getInt("away");
+
+                if (score.has("fulltime") && !score.isNull("fulltime")) {
+                    JSONObject fulltime = score.getJSONObject("fulltime");
+                    homeGoals = fulltime.isNull("home") ? homeGoals : fulltime.getInt("home");
+                    awayGoals = fulltime.isNull("away") ? awayGoals : fulltime.getInt("away");
                 }
+
+                String status = matchObject.getJSONObject("fixture").getJSONObject("status").getString("short");
+
+
+                Match match = new Match(date, homeTeam, awayTeam, homeGoals, awayGoals, status);
+                matches.add(match);
             }
-
-            // Сортировка матчей по дате
-            Collections.sort(matches, new Comparator<Match>() {
-                @Override
-                public int compare(Match m1, Match m2) {
-                    return m1.getDate().compareTo(m2.getDate());
-                }
-            });
-
         } catch (Exception e) {
-            e.printStackTrace();  // Логируем исключения для отладки
+            Log.e("FootballApi", "Error parsing matches", e);
         }
         return matches;
     }
-
-
 
     public static ArrayList<TeamStanding> parseStandings(String jsonData) {
         ArrayList<TeamStanding> standings = new ArrayList<>();
@@ -68,9 +59,15 @@ public class FootballApi {
             JSONObject jsonObject = new JSONObject(jsonData);
             JSONArray response = jsonObject.getJSONArray("response");
 
-            if (response.length() > 0) {
-                JSONObject league = response.getJSONObject(0).getJSONObject("league");
+            for (int j = 0; j < response.length(); j++) {
+                JSONObject leagueObj = response.getJSONObject(j);
+                JSONObject league = leagueObj.getJSONObject("league");
+                String leagueName = league.getString("name");
                 JSONArray standingsArray = league.getJSONArray("standings").getJSONArray(0);
+
+                if (standings.isEmpty()) {
+                    standings.add(new TeamStanding("League: " + leagueName, true, 0));
+                }
 
                 for (int i = 0; i < standingsArray.length(); i++) {
                     JSONObject teamObj = standingsArray.getJSONObject(i);
@@ -82,7 +79,7 @@ public class FootballApi {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("FootballApi", "Error parsing standings", e);
         }
         return standings;
     }
@@ -97,35 +94,32 @@ public class FootballApi {
                 JSONObject article = articles.getJSONObject(i);
                 String title = article.getString("title");
                 String description = article.getString("description");
-
                 newsList.add(new NewsItem(title, description));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("FootballApi", "Error parsing news", e);
         }
         return newsList;
     }
 
-    public static ArrayList<TransferItem> parseTransfers(String jsonData) {
-        ArrayList<TransferItem> transferList = new ArrayList<>();
+    public static List<Transfer> parseTransfers(String jsonData) {
+        List<Transfer> transfers = new ArrayList<>();
         try {
             JSONObject jsonObject = new JSONObject(jsonData);
-            JSONArray transfers = jsonObject.getJSONArray("response");
+            JSONArray transferArray = jsonObject.getJSONArray("transfers");
 
-            for (int i = 0; i < transfers.length(); i++) {
-                JSONObject transfer = transfers.getJSONObject(i);
-                String player = transfer.getJSONObject("player").getString("name");
-                String fromTeam = transfer.getJSONObject("teams").getJSONObject("out").getString("name");
-                String toTeam = transfer.getJSONObject("teams").getJSONObject("in").getString("name");
+            for (int i = 0; i < transferArray.length(); i++) {
+                JSONObject transferObj = transferArray.getJSONObject(i);
+                String playerName = transferObj.getString("player_name");
+                String fromTeam = transferObj.getString("from_team");
+                String toTeam = transferObj.getString("to_team");
+                String transferDate = transferObj.getString("transfer_date");
 
-                transferList.add(new TransferItem(player, fromTeam, toTeam));
+                transfers.add(new Transfer(playerName, fromTeam, toTeam, transferDate));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (JSONException e) {
+            Log.e("ApiClient", "Error parsing transfers", e);
         }
-        return transferList;
+        return transfers;
     }
-
-
-
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "352571414520",
+    "project_id": "foot-zone",
+    "storage_bucket": "foot-zone.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352571414520:android:dd47d46312b8cf0948e80d",
+        "android_client_info": {
+          "package_name": "com.example.footzone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByN4BEzkRtqanK-TK6JDN2QZUutFdj3Jc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

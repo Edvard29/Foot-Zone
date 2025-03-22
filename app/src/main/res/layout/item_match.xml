@@ -1,22 +1,40 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_margin="8dp"
+    android:layout_gravity="center"
+    android:elevation="8dp"
+    android:background="@color/card_background"
+    android:padding="12dp">
 
-    <TextView
-        android:id="@+id/match_date"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Date"
-        android:textSize="14sp"
-        android:textColor="#000000"/>
+        android:orientation="vertical"
+        android:padding="12dp">
 
-    <TextView
-        android:id="@+id/match_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Match Info"
-        android:textSize="16sp"
-        android:textColor="#000000"/>
-</LinearLayout>
+        <!-- Дата матча -->
+        <TextView
+            android:id="@+id/match_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Дата матча"
+            android:textColor="@color/date_text_color"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Информация о матче (команды и счёт) -->
+        <TextView
+            android:id="@+id/match_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Team A 2 : 1 Team B"
+            android:textColor="@color/team_info_text_color"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

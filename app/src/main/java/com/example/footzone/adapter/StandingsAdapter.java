@@ -29,6 +29,7 @@ public class StandingsAdapter extends RecyclerView.Adapter<StandingsAdapter.View
         TeamStanding standing = standingsList.get(position);
         holder.teamName.setText(standing.getTeamName());
         holder.points.setText(String.valueOf(standing.getPoints()));
+
     }
 
     @Override

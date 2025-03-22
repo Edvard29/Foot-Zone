@@ -57,6 +57,10 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(this, ChatActivity.class));
         } else if (id == R.id.nav_select_team) {
             startActivity(new Intent(this, SelectTeamActivity.class));
+        }else if (id == R.id.nav_scorers) {
+            startActivity(new Intent(this, TopScorersActivity.class));
+        }else if (id == R.id.nav_assists) {
+            startActivity(new Intent(this, AssistLeadersActivity.class));
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);

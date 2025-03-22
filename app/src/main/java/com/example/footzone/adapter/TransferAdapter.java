@@ -5,34 +5,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.footzone.R;
-import com.example.footzone.model.TransferItem;
+import com.example.footzone.model.Transfer;
 
 import java.util.List;
 
-public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.ViewHolder> {
-    private List<TransferItem> transferList;
+public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.TransferViewHolder> {
 
-    public TransferAdapter(List<TransferItem> transferList) {
+    private List<Transfer> transferList;
+
+    public TransferAdapter(List<Transfer> transferList) {
         this.transferList = transferList;
     }
 
-    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_transfer, parent, false);
-        return new ViewHolder(view);
+    public TransferViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_transfer, parent, false);
+        return new TransferViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        TransferItem transfer = transferList.get(position);
+    public void onBindViewHolder(TransferViewHolder holder, int position) {
+        Transfer transfer = transferList.get(position);
         holder.playerName.setText(transfer.getPlayerName());
-        holder.fromTeam.setText("Из: " + transfer.getFromTeam());
-        holder.toTeam.setText("В: " + transfer.getToTeam());
+        holder.fromTeam.setText("From: " + transfer.getFromTeam());
+        holder.toTeam.setText("To: " + transfer.getToTeam());
+        holder.transferDate.setText("Date: " + transfer.getTransferDate());
     }
 
     @Override
@@ -40,14 +41,15 @@ public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.ViewHo
         return transferList.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView playerName, fromTeam, toTeam;
+    public static class TransferViewHolder extends RecyclerView.ViewHolder {
+        TextView playerName, fromTeam, toTeam, transferDate;
 
-        public ViewHolder(@NonNull View itemView) {
+        public TransferViewHolder(View itemView) {
             super(itemView);
-            playerName = itemView.findViewById(R.id.text_player_name);
-            fromTeam = itemView.findViewById(R.id.text_from_team);
-            toTeam = itemView.findViewById(R.id.text_to_team);
+            playerName = itemView.findViewById(R.id.player_name);
+            fromTeam = itemView.findViewById(R.id.from_team);
+            toTeam = itemView.findViewById(R.id.to_team);
+            transferDate = itemView.findViewById(R.id.transfer_date);
         }
     }
 }
