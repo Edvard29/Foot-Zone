@@ -1,0 +1,30 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:title="Главная"
+        android:icon="@drawable/ic_table"/>
+    <item
+        android:id="@+id/nav_news"
+        android:title="Новости"
+        android:icon="@drawable/ic_news"/>
+    <item
+        android:id="@+id/nav_transfers"
+        android:title="Трансферы"
+        android:icon="@drawable/ic_transfer"/>
+    <item
+        android:id="@+id/nav_standigs"
+        android:title="Таблицы"
+        android:icon="@drawable/ic_table"/>
+    <item
+        android:id="@+id/nav_squad"
+        android:title="Составы"
+        android:icon="@drawable/ic_squad"/>
+    <item
+        android:id="@+id/nav_chat"
+        android:title="Чат"
+        android:icon="@drawable/ic_chat"/>
+    <item
+        android:id="@+id/nav_select_team"
+        android:title="Выбрать команду"
+        android:icon="@drawable/ic_team"/>
+</menu>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/white">
+
+
+
+    <!-- Заголовок страницы -->
+    <TextView
+        android:id="@+id/select_team_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Выберите вашу любимую команду"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Spinner для выбора команды -->
+    <Spinner
+        android:id="@+id/team_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="@drawable/edittext_background"/>
+
+    <!-- Кнопка для подтверждения выбора -->
+    <Button
+        android:id="@+id/select_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Выбрать команду"
+        android:textColor="@color/white"
+        android:background="@color/green"
+        android:layout_marginTop="20dp" />
+
+    <!-- Текстовая информация о выбранной команде -->
+    <TextView
+        android:id="@+id/team_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="20dp" />
+
+</LinearLayout>
