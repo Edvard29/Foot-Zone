@@ -65,17 +65,20 @@ public class FootballApi {
                 String leagueName = league.getString("name");
                 JSONArray standingsArray = league.getJSONArray("standings").getJSONArray(0);
 
-                if (standings.isEmpty()) {
-                    standings.add(new TeamStanding("League: " + leagueName, true, 0));
+                // Добавляем информацию о лиге только один раз
+                if (j == 0) {
+                    standings.add(new TeamStanding("League: " + leagueName, true, 0)); // Заголовок лиги
                 }
 
+                // Перебираем список команд в лиге
                 for (int i = 0; i < standingsArray.length(); i++) {
                     JSONObject teamObj = standingsArray.getJSONObject(i);
                     JSONObject team = teamObj.getJSONObject("team");
                     String teamName = team.getString("name");
                     int points = teamObj.getInt("points");
 
-                    standings.add(new TeamStanding(teamName, points));
+                    // Добавляем каждую команду
+                    standings.add(new TeamStanding(teamName, false, points));
                 }
             }
         } catch (Exception e) {
@@ -83,6 +86,7 @@ public class FootballApi {
         }
         return standings;
     }
+
 
     public static ArrayList<NewsItem> parseNews(String jsonData) {
         ArrayList<NewsItem> newsList = new ArrayList<>();

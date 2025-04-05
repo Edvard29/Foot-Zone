@@ -1,45 +1,46 @@
 package com.example.footzone.model;
 
-
-
-
 public class TeamStanding {
-    private String name;
-    private boolean isHeader;
+    private String teamName;
+    private boolean isLeagueName;
     private int points;
 
-    public TeamStanding(String name, boolean isHeader) {
-        this.name = name;
+    // Конструктор с тремя параметрами (оставляем, если нужно для других случаев)
+    public TeamStanding(String teamName, boolean isLeagueName, int points) {
+        this.teamName = teamName;
+        this.isLeagueName = isLeagueName;
         this.points = points;
-        this.isHeader = isHeader;
     }
 
-    public TeamStanding(String name, int points) {
-        this.name = name;
+    // Конструктор с двумя параметрами (если булевый параметр не нужен)
+    public TeamStanding(String teamName, int points) {
+        this.teamName = teamName;
+        this.isLeagueName = false;  // или любое другое значение по умолчанию
         this.points = points;
-        this.isHeader = false;
     }
 
-    public TeamStanding(String name, boolean isHeader, int points) {
-        this.name = name;
-        this.points = points;
-        this.isHeader = isHeader;
+    // Геттеры и сеттеры для всех полей
+    public String getTeamName() {
+        return teamName;
     }
 
-
-    public String getName() {
-        return name;
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
     }
 
-    public boolean isHeader() {
-        return isHeader;
+    public boolean isLeagueName() {
+        return isLeagueName;
+    }
+
+    public void setLeagueName(boolean leagueName) {
+        isLeagueName = leagueName;
     }
 
     public int getPoints() {
         return points;
     }
 
-    public String getTeamName() {
-        return name;
+    public void setPoints(int points) {
+        this.points = points;
     }
 }

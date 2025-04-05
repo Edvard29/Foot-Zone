@@ -10,6 +10,13 @@
             <item>Бундеслига</item>
             <item>Лига 1</item>
         </string-array>
+    <string-array name="league_names">
+        <item>English Premier League</item>
+        <item>Ligue 1</item>
+        <item>Bundesliga</item>
+        <item>La Liga</item>
+        <item>Serie A</item>
+    </string-array>
 
 
 </resources>
