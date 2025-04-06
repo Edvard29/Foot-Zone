@@ -24,5 +24,7 @@
         <!-- Дополнительные цвета -->
         <color name="highlight_color">#FF5722</color>
         <color name="accent_color">#388E3C</color>
+        <color name="purple_500">#6200EE</color>
+
 
 </resources>

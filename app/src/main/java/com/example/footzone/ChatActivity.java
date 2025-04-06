@@ -1,87 +1,100 @@
 package com.example.footzone;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.footzone.adapter.ChatAdapter;
-import com.example.footzone.model.ChatMessage;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.*;
+import com.example.footzone.model.Message;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
-    private ChatAdapter chatAdapter;
+    private RecyclerView chatRecyclerView;
     private EditText messageInput;
     private Button sendButton;
-    private List<ChatMessage> messageList = new ArrayList<>();
-
+    private ChatAdapter chatAdapter;
+    private List<Message> messageList = new ArrayList<>();
     private DatabaseReference chatRef;
-    private FirebaseUser currentUser;
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message);
+        setContentView(R.layout.activity_chat);
 
-        recyclerView = findViewById(R.id.chat_recyclerview);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        int fixtureId = getIntent().getIntExtra("fixtureId", -1);
+        String matchTitle = getIntent().getStringExtra("matchTitle");
+        getSupportActionBar().setTitle("Chat: " + matchTitle);
+
+        chatRecyclerView = findViewById(R.id.chat_recycler_view);
         messageInput = findViewById(R.id.message_input);
         sendButton = findViewById(R.id.send_button);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         chatAdapter = new ChatAdapter(messageList);
-        recyclerView.setAdapter(chatAdapter);
+        chatRecyclerView.setAdapter(chatAdapter);
 
-        // Получение текущего пользователя Firebase
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        chatRef = FirebaseDatabase.getInstance().getReference("chat_messages");
+        // Получаем имя пользователя из SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        username = prefs.getString("username", "Anonymous"); // "Anonymous" на случай ошибки
 
-        loadMessages(); // Загружаем сообщения из Firebase
+        chatRef = FirebaseDatabase.getInstance().getReference("chats").child(String.valueOf(fixtureId));
+        listenForMessages();
 
         sendButton.setOnClickListener(v -> sendMessage());
     }
 
     private void sendMessage() {
         String messageText = messageInput.getText().toString().trim();
-        if (messageText.isEmpty() || currentUser == null) return;
-
-        String userId = currentUser.getUid();
-        String userName = currentUser.getEmail(); // Можно использовать другое поле, если есть
-        long timestamp = System.currentTimeMillis();
-
-        ChatMessage newMessage = new ChatMessage(userId, userName, messageText, timestamp);
-        chatRef.push().setValue(newMessage);
-
-        messageInput.setText(""); // Очищаем поле ввода
+        if (!messageText.isEmpty()) {
+            Message message = new Message(messageText, username, System.currentTimeMillis());
+            chatRef.push().setValue(message);
+            messageInput.setText("");
+        }
     }
 
-    private void loadMessages() {
-        chatRef.orderByChild("timestamp").limitToLast(50).addValueEventListener(new ValueEventListener() {
+    private void listenForMessages() {
+        chatRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 messageList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    ChatMessage message = snapshot.getValue(ChatMessage.class);
+                    Message message = snapshot.getValue(Message.class);
                     if (message != null) {
                         messageList.add(message);
                     }
                 }
                 chatAdapter.notifyDataSetChanged();
-                recyclerView.scrollToPosition(messageList.size() - 1);
+                chatRecyclerView.scrollToPosition(messageList.size() - 1);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e("Firebase", "Ошибка загрузки сообщений", databaseError.toException());
+            public void onCancelled(DatabaseError databaseError) {
+                // Обработка ошибок
             }
         });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 }

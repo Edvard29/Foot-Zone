@@ -10,24 +10,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.footzone.adapter.TransferAdapter;
 import com.example.footzone.network.ApiClient;
-import com.example.footzone.network.ApiResponseCallback;
 import com.example.footzone.model.Transfer;
+import com.example.footzone.network.ApiResponseCallback;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TransfersActivity extends AppCompatActivity {
 
     private RecyclerView transfersRecyclerView;
     private TransferAdapter transferAdapter;
     private List<Transfer> transferList = new ArrayList<>();
-
-    // Пример id лиги и сезона (можно заменить на актуальные данные)
-    private int leagueId = 39; // Например, английская Премьер-лига
-    private int seasonYear = 2025;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,44 +42,55 @@ public class TransfersActivity extends AppCompatActivity {
     }
 
     private void loadTransfers() {
-        ApiClient.getTransfers(leagueId, seasonYear, new ApiResponseCallback() {
-            @Override
-            public void onSuccess(String response) {
-                try {
-                    // Преобразуем ответ в JSON
-                    JSONObject jsonResponse = new JSONObject(response);
-                    JSONArray transfersArray = jsonResponse.getJSONArray("response");
+        Executors.newSingleThreadExecutor().execute(() -> {
+            // Вместо leagueId и seasonYear теперь используем реальные ID команды и игрока
+            int playerId = 35845; // Заменить на актуальный ID игрока
+            int teamId = 1126; // Заменить на актуальный ID команды
 
-                    // Очищаем список перед добавлением новых данных
-                    transferList.clear();
+            try {
+                ApiClient.getTransfers(playerId, teamId, new ApiResponseCallback() {
+                    @Override
+                    public void onSuccess(String response) {
+                        runOnUiThread(() -> {
+                            try {
+                                JSONObject jsonResponse = new JSONObject(response);
+                                JSONArray transfersArray = jsonResponse.getJSONArray("response");
 
-                    // Проходим по массиву трансферов и добавляем их в список
-                    for (int i = 0; i < transfersArray.length(); i++) {
-                        JSONObject transferObj = transfersArray.getJSONObject(i);
+                                transferList.clear();
 
-                        String playerName = transferObj.getJSONObject("player").getString("name");
-                        String fromTeam = transferObj.getJSONObject("teams").getString("from");
-                        String toTeam = transferObj.getJSONObject("teams").getString("to");
-                        String transferDate = transferObj.getString("date");
+                                for (int i = 0; i < transfersArray.length(); i++) {
+                                    JSONObject transferObj = transfersArray.getJSONObject(i);
 
-                        Transfer transfer = new Transfer(playerName, fromTeam, toTeam, transferDate);
-                        transferList.add(transfer);
+                                    String playerName = transferObj.getJSONObject("player").getString("name");
+                                    String fromTeam = transferObj.getJSONObject("teams").getJSONObject("out").getString("name");
+                                    String toTeam = transferObj.getJSONObject("teams").getJSONObject("in").getString("name");
+                                    String transferDate = transferObj.getString("date");
+
+                                    Transfer transfer = new Transfer(playerName, fromTeam, toTeam, transferDate);
+                                    transferList.add(transfer);
+                                }
+
+                                transferAdapter.notifyDataSetChanged();
+                            } catch (Exception e) {
+                                Log.e("TransfersActivity", "Ошибка при парсинге данных: " + e.getMessage());
+                                Toast.makeText(TransfersActivity.this, "Ошибка при получении данных", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
 
-                    // Уведомляем адаптер о том, что данные обновились
-                    transferAdapter.notifyDataSetChanged();
-                } catch (Exception e) {
-                    Log.e("TransfersActivity", "Ошибка при парсинге данных: " + e.getMessage());
-                    Toast.makeText(TransfersActivity.this, "Ошибка при получении данных", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(String error) {
-                // Обработка ошибок
-                Log.e("TransfersActivity", "Ошибка: " + error);
-                Toast.makeText(TransfersActivity.this, "Ошибка при загрузке трансферов", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onFailure(String error) {
+                        runOnUiThread(() -> {
+                            Log.e("TransfersActivity", "Ошибка: " + error);
+                            Toast.makeText(TransfersActivity.this, "Ошибка при загрузке трансферов", Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
     }
+
+
 }

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/toolbar_color"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            android:title="Match Statistics"
+            android:titleTextColor="@android:color/white"/>
+
+        <!-- Название команд -->
+        <TextView
+            android:id="@+id/match_teams"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Team A vs Team B"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/team_info_text_color"
+            android:layout_marginTop="16dp"/>
+
+        <!-- Дата матча -->
+        <TextView
+            android:id="@+id/match_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date"
+            android:textSize="14sp"
+            android:textColor="@color/date_text_color"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Статистика -->
+        <TextView
+            android:id="@+id/possession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Possession: Team A 55% - Team B 45%"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/shots_on_goal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shots on Goal: Team A 10 - Team B 8"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/shots_off_goal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shots off Goal: Team A 5 - Team B 3"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/corners"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Corners: Team A 6 - Team B 4"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/fouls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fouls: Team A 12 - Team B 15"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp"/>
+
+    </LinearLayout>
+</ScrollView>

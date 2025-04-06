@@ -19,8 +19,6 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -57,6 +55,50 @@ public class ApiClient {
             }
         });
     }
+    public static void getMatchStatistics(int fixtureId, ApiResponseCallback callback) {
+        executorService.execute(() -> {
+            String apiUrl = "https://v3.football.api-sports.io/fixtures/statistics?fixture=" + fixtureId;
+            try {
+                Request request = new Request.Builder()
+                        .url(apiUrl)
+                        .addHeader("x-apisports-key", API_KEY)
+                        .build();
+                Response response = client.newCall(request).execute();
+                if (!response.isSuccessful()) {
+                    callback.onFailure("Ошибка запроса: " + response.code());
+                    return;
+                }
+                ResponseBody responseBody = response.body();
+                String result = responseBody != null ? responseBody.string() : null;
+                callback.onSuccess(result);
+            } catch (IOException e) {
+                callback.onFailure("Ошибка сети: " + e.getMessage());
+            }
+        });
+    }
+
+
+    public static void getLineups(int fixtureId, ApiResponseCallback callback) {
+        executorService.execute(() -> {
+            String apiUrl = "https://v3.football.api-sports.io/fixtures/lineups?fixture=" + fixtureId;
+            try {
+                Request request = new Request.Builder()
+                        .url(apiUrl)
+                        .addHeader("x-apisports-key", API_KEY)
+                        .build();
+                Response response = client.newCall(request).execute();
+                if (!response.isSuccessful()) {
+                    callback.onFailure("Ошибка запроса: " + response.code());
+                    return;
+                }
+                ResponseBody responseBody = response.body();
+                String result = responseBody != null ? responseBody.string() : null;
+                callback.onSuccess(result);
+            } catch (IOException e) {
+                callback.onFailure("Ошибка сети: " + e.getMessage());
+            }
+        });
+    }
 
 
     public static String getFootballDataStandings(int leagueId) {
@@ -74,48 +116,28 @@ public class ApiClient {
         }
     }
 
-    public static String getFootballNews() {
-        String apiUrl = " https://v3.football.api-sports.io/transfers?";
-        try {
-            Request request = new Request.Builder()
-                    .url(apiUrl)
-                    .addHeader("x-apisports-key", API_KEY)
-                    .build();
-            Response response = client.newCall(request).execute();
-            return response.body() != null ? response.body().string() : null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
-    public static void getTransfers(int leagueId, int seasonYear, ApiResponseCallback callback) {
-        String apiUrl = "https://v3.football.api-sports.io/transfers?league=" + leagueId + "&season=" + seasonYear;
-        try {
-            Request request = new Request.Builder()
-                    .url(apiUrl)
-                    .addHeader("x-apisports-key", API_KEY)
-                    .build();
+    public static String getTransfers(int playerId, int teamId, ApiResponseCallback callback) throws Exception {
+        // Твой код для выполнения запроса
+        String url = "https://api-football-v1.p.rapidapi.com/v3/transfers?player=" + playerId + "&team=" + teamId;
 
-            Response response = client.newCall(request).execute();
 
-            // Логируем полный ответ от сервера
-            String responseBody = response.body() != null ? response.body().string() : null;
-            Log.d("ApiClient", "Transfers API Response: " + responseBody);
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .addHeader("X-RapidAPI-Key", "YOUR_API_KEY")
+                .build();
 
-            if (responseBody != null && !responseBody.isEmpty()) {
-                // Вызываем parseTransfers для обработки данных
-                parseTransfers(responseBody, callback);
-            } else {
-                callback.onFailure("Пустой ответ от API");
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new Exception("Ошибка запроса: " + response.code());
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e("ApiClient", "Ошибка при загрузке трансферов: " + e.getMessage());
-            callback.onFailure(e.getMessage());
+            return response.body().string(); // Возвращаем строку с ответом
         }
     }
+
+
+
 
     public static void parseTransfers(String responseBody, ApiResponseCallback callback) {
         try {
@@ -129,27 +151,23 @@ public class ApiClient {
 
                 JSONObject playerObject = transferObject.getJSONObject("player");
                 String playerName = playerObject.getString("name");
-                String playerTeam = playerObject.getString("team");
-                String playerPosition = playerObject.getString("position");
 
                 JSONObject transferDetails = transferObject.getJSONObject("transfer");
-                String transferDate = transferDetails.getString("date");
-                String fromTeam = transferDetails.getString("from_team");
-                String toTeam = transferDetails.getString("to_team");
-                String transferFee = transferDetails.getString("fee");
+                String transferDate = transferDetails.optString("date", "N/A");
+                String fromTeam = transferDetails.optString("from_team", "N/A");
+                String toTeam = transferDetails.optString("to_team", "N/A");
 
-                // Создаем объект Transfer, передавая все 7 параметров
-                Transfer transfer = new Transfer(playerName, playerTeam, playerPosition, transferDate, fromTeam, toTeam, transferFee);
+                Transfer transfer = new Transfer(playerName, fromTeam, toTeam, transferDate);
                 transfers.add(transfer);
             }
 
-            // Передаем результат в callback
             callback.onSuccess(transfers.toString());
         } catch (Exception e) {
             e.printStackTrace();
             callback.onFailure("Ошибка при разборе данных: " + e.getMessage());
         }
     }
+
 
 
     public static String getTeamSquad(int teamId) {
@@ -159,13 +177,34 @@ public class ApiClient {
                     .url(apiUrl)
                     .addHeader("x-apisports-key", API_KEY)
                     .build();
+
             Response response = client.newCall(request).execute();
             return response.body() != null ? response.body().string() : null;
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
+
+    // Получение команд по лиге и сезону
+    public static String getTeamsByLeague(int leagueId, int season) {
+        String apiUrl = "https://v3.football.api-sports.io/teams?league=" + leagueId + "&season=" + season;
+        try {
+            Request request = new Request.Builder()
+                    .url(apiUrl)
+                    .addHeader("x-apisports-key", API_KEY)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            return response.body() != null ? response.body().string() : null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     public static void getTopScorers(int leagueId, int seasonYear, ApiResponseCallback callback) {
         String apiUrl = "https://v3.football.api-sports.io/players/topscorers?league=" + leagueId + "&season=" + seasonYear;
@@ -244,38 +283,7 @@ public class ApiClient {
 
         return scorers;
     }
-    public static List<Match> parseMatches(String jsonData) {
-        List<Match> filteredMatches = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
-        try {
-            JSONObject jsonObject = new JSONObject(jsonData);
-            JSONArray responseArray = jsonObject.getJSONArray("response");
-            Date filterDate = sdf.parse("2025-03-15");
-
-            for (int i = 0; i < responseArray.length(); i++) {
-                JSONObject matchObject = responseArray.getJSONObject(i);
-                JSONObject fixture = matchObject.getJSONObject("fixture");
-                JSONObject teams = matchObject.getJSONObject("teams");
-
-                String dateStr = fixture.getString("date").substring(0, 10); // "2025-03-16T14:00:00+00:00"
-                Date matchDate = sdf.parse(dateStr);
-
-                if (matchDate != null && !matchDate.before(filterDate)) {
-                    String teamA = teams.getJSONObject("home").getString("name");
-                    String teamB = teams.getJSONObject("away").getString("name");
-
-                    Match match = new Match("Team A", "Team B", "2025-03-15", 2, 1, "FT");
-
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return filteredMatches;
-    }
 
 
     public static List<Footballer> parseAssistants(String jsonData) {

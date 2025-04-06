@@ -1,12 +1,56 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Основной силуэт бутсы -->
     <path
-        android:fillColor="#FFA500"
-        android:pathData="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M12,4c4.41,0,8,3.59,8,8s-3.59,8-8,8s-8-3.59-8-8S7.59,4,12,4z M12,6c-3.31,0-6,2.69-6,6s2.69,6,6,6s6-2.69,6-6S15.31,6,12,6z"/>
+        android:fillColor="#000000"
+        android:pathData="M30,130
+                         C30,120 40,110 50,110
+                         L140,110
+                         C150,110 160,100 160,90
+                         L160,80
+                         L130,80
+                         C120,80 110,70 100,70
+                         L80,70
+                         C70,70 60,80 50,85
+                         L30,100
+                         Z" />
+
+    <!-- Шипы на подошве -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M16,8l-4,4-4-4"/>
+        android:fillColor="#444444"
+        android:pathData="M40,130
+                         L40,140
+                         L45,140
+                         L45,130
+                         Z
+                         M60,130
+                         L60,140
+                         L65,140
+                         L65,130
+                         Z
+                         M80,130
+                         L80,140
+                         L85,140
+                         L85,130
+                         Z
+                         M100,130
+                         L100,140
+                         L105,140
+                         L105,130
+                         Z
+                         M120,130
+                         L120,140
+                         L125,140
+                         L125,130
+                         Z
+                         M140,130
+                         L140,140
+                         L145,140
+                         L145,130
+                         Z" />
+
 </vector>

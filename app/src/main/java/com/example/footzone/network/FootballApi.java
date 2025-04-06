@@ -1,7 +1,7 @@
 package com.example.footzone.network;
 
 import android.util.Log;
-import com.example.footzone.model.NewsItem;
+
 import com.example.footzone.model.TeamStanding;
 import com.example.footzone.model.Match;
 import com.example.footzone.model.Transfer;
@@ -26,8 +26,10 @@ public class FootballApi {
                 JSONObject goals = matchObject.getJSONObject("goals");
                 JSONObject score = matchObject.getJSONObject("score");
 
-                // Получаем дату матча
-                String date = matchObject.getJSONObject("fixture").getString("date");
+                // Получаем дату и ID матча
+                JSONObject fixture = matchObject.getJSONObject("fixture");
+                String date = fixture.getString("date");
+                int fixtureId = fixture.getInt("id"); // <-- добавлено
 
                 String homeTeam = teams.getJSONObject("home").getString("name");
                 String awayTeam = teams.getJSONObject("away").getString("name");
@@ -41,10 +43,9 @@ public class FootballApi {
                     awayGoals = fulltime.isNull("away") ? awayGoals : fulltime.getInt("away");
                 }
 
-                String status = matchObject.getJSONObject("fixture").getJSONObject("status").getString("short");
+                String status = fixture.getJSONObject("status").getString("short");
 
-
-                Match match = new Match(date, homeTeam, awayTeam, homeGoals, awayGoals, status);
+                Match match = new Match(date, homeTeam, awayTeam, homeGoals, awayGoals, status, fixtureId);
                 matches.add(match);
             }
         } catch (Exception e) {
@@ -52,6 +53,7 @@ public class FootballApi {
         }
         return matches;
     }
+
 
     public static ArrayList<TeamStanding> parseStandings(String jsonData) {
         ArrayList<TeamStanding> standings = new ArrayList<>();
@@ -88,23 +90,7 @@ public class FootballApi {
     }
 
 
-    public static ArrayList<NewsItem> parseNews(String jsonData) {
-        ArrayList<NewsItem> newsList = new ArrayList<>();
-        try {
-            JSONObject jsonObject = new JSONObject(jsonData);
-            JSONArray articles = jsonObject.getJSONArray("response");
 
-            for (int i = 0; i < articles.length(); i++) {
-                JSONObject article = articles.getJSONObject(i);
-                String title = article.getString("title");
-                String description = article.getString("description");
-                newsList.add(new NewsItem(title, description));
-            }
-        } catch (Exception e) {
-            Log.e("FootballApi", "Error parsing news", e);
-        }
-        return newsList;
-    }
 
     public static List<Transfer> parseTransfers(String jsonData) {
         List<Transfer> transfers = new ArrayList<>();

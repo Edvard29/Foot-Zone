@@ -45,17 +45,15 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
 
         if (id == R.id.nav_home) {
             startActivity(new Intent(this, MainActivity.class));
-        } else if (id == R.id.nav_news) {
-            startActivity(new Intent(this, NewsActivity.class));
-        } else if (id == R.id.nav_transfers) {
+        }
+        else if (id == R.id.nav_transfers) {
             startActivity(new Intent(this, TransfersActivity.class));
         } else if (id == R.id.nav_squad) {
             startActivity(new Intent(this, SquadActivity.class));
         } else if (id == R.id.nav_standigs) {
             startActivity(new Intent(this, StandingsActivity.class));
-        } else if (id == R.id.nav_chat) {
-            startActivity(new Intent(this, ChatActivity.class));
-        } else if (id == R.id.nav_select_team) {
+        }
+         else if (id == R.id.nav_select_team) {
             startActivity(new Intent(this, SelectTeamActivity.class));
         }else if (id == R.id.nav_scorers) {
             startActivity(new Intent(this, TopScorersActivity.class));
