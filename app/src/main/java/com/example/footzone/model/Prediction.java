@@ -5,8 +5,8 @@ public class Prediction {
     private int fixtureId;
     private int homeGoals;
     private int awayGoals;
-    private String homeLineup;
-    private String awayLineup;
+    private String homeLineup; // JSON строка с ID игроков, например, "[123, 124, ...]"
+    private String awayLineup; // JSON строка с ID игроков
     private long timestamp;
 
     public Prediction() {

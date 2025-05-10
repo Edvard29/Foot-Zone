@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -10,82 +12,128 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Toolbar -->
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+
+
+        <!-- Контейнер для названия команд и даты -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/toolbar_color"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:title="Match Statistics"
-            android:titleTextColor="@android:color/white"/>
-
-        <!-- Название команд -->
-        <TextView
-            android:id="@+id/match_teams"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Team A vs Team B"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/team_info_text_color"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#1A3C34">
 
-        <!-- Дата матча -->
-        <TextView
-            android:id="@+id/match_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Date"
-            android:textSize="14sp"
-            android:textColor="@color/date_text_color"
-            android:layout_marginTop="8dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-        <!-- Статистика -->
-        <TextView
-            android:id="@+id/possession"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Possession: Team A 55% - Team B 45%"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="16dp"/>
+                <!-- Название команд -->
+                <TextView
+                    android:id="@+id/match_teams"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Команда A vs Команда B"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:layout_gravity="center_horizontal" />
 
-        <TextView
-            android:id="@+id/shots_on_goal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Shots on Goal: Team A 10 - Team B 8"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="8dp"/>
+                <!-- Дата матча -->
+                <TextView
+                    android:id="@+id/match_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Дата"
+                    android:textSize="14sp"
+                    android:textColor="#B0BEC5"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/shots_off_goal"
-            android:layout_width="wrap_content"
+        <!-- Статистика в CardView -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Shots off Goal: Team A 5 - Team B 3"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#1A3C34">
 
-        <TextView
-            android:id="@+id/corners"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Corners: Team A 6 - Team B 4"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="8dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-        <TextView
-            android:id="@+id/fouls"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Fouls: Team A 12 - Team B 15"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="8dp"/>
+                <!-- Владение мячом -->
+                <TextView
+                    android:id="@+id/possession"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Владение мячом: Команда A 55% - Команда B 45%"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:drawableStart="@drawable/ic_possession"
+                    android:drawablePadding="12dp"
+                    android:paddingVertical="8dp" />
+
+                <!-- Удары в створ -->
+                <TextView
+                    android:id="@+id/shots_on_goal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Удары в створ: Команда A 10 - Команда B 8"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="8dp"
+                    android:drawableStart="@drawable/ic_shots_on_goal"
+                    android:drawablePadding="12dp"
+                    android:paddingVertical="8dp" />
+
+                <!-- Удары мимо -->
+                <TextView
+                    android:id="@+id/shots_off_goal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Удары мимо: Команда A 5 - Команда B 3"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="8dp"
+                    android:drawableStart="@drawable/ic_shots_off_goal"
+                    android:drawablePadding="12dp"
+                    android:paddingVertical="8dp" />
+
+                <!-- Угловые -->
+                <TextView
+                    android:id="@+id/corners"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Угловые: Команда A 6 - Команда B 4"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="8dp"
+                    android:drawableStart="@drawable/ic_corners"
+                    android:drawablePadding="12dp"
+                    android:paddingVertical="8dp" />
+
+                <!-- Фолы -->
+                <TextView
+                    android:id="@+id/fouls"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Фолы: Команда A 12 - Команда B 15"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="8dp"
+                    android:drawableStart="@drawable/ic_fouls"
+                    android:drawablePadding="12dp"
+                    android:paddingVertical="8dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

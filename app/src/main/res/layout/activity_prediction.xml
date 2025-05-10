@@ -1,120 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content_frame"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/toolbar_color"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:title="Make Prediction"
-            android:titleTextColor="@android:color/white"/>
-
-        <TextView
-            android:id="@+id/match_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Team A vs Team B"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="16dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Predict Score"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="16dp"/>
+        android:layout_height="match_parent"
+        android:background="@color/background"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <EditText
-                android:id="@+id/home_goals"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:hint="Home"
-                android:textColor="@android:color/black"/>
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
+                android:id="@+id/match_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Team A vs Team B"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_text"
+                android:gravity="center"
+                android:layout_marginTop="16dp" />
+
+            <!-- Предсказание счета -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Predict Score"
+                android:textSize="18sp"
+                android:textColor="@color/primary_text"
+                android:layout_marginTop="16dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <EditText
+                    android:id="@+id/home_goals"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:hint="0"
+                    android:gravity="center"
+                    android:textColor="@color/primary_text"
+                    android:backgroundTint="@color/primary_color" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" : "
+                    android:textSize="18sp"
+                    android:textColor="@color/primary_text" />
+
+                <EditText
+                    android:id="@+id/away_goals"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:hint="0"
+                    android:gravity="center"
+                    android:textColor="@color/primary_text"
+                    android:backgroundTint="@color/primary_color" />
+            </LinearLayout>
+
+            <!-- Предсказание состава домашней команды -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Predict Home Team Lineup (Select 11 Players)"
+                android:textSize="18sp"
+                android:textColor="@color/primary_text"
+                android:layout_marginTop="16dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/home_lineup_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Предсказание состава гостевой команды -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Predict Away Team Lineup (Select 11 Players)"
+                android:textSize="18sp"
+                android:textColor="@color/primary_text"
+                android:layout_marginTop="16dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/away_lineup_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/submit_prediction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Submit Prediction"
+                android:textSize="16sp"
+                android:backgroundTint="@color/primary_color"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="16dp" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=" : "
-                android:textSize="16sp"/>
-
-            <EditText
-                android:id="@+id/away_goals"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:hint="Away"
-                android:textColor="@android:color/black"/>
+                android:layout_gravity="center"
+                android:visibility="gone" />
 
         </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Predict Starting Lineup (Home Team)"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="16dp"/>
-
-        <Spinner
-            android:id="@+id/home_player_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"/>
-
-        <Spinner
-            android:id="@+id/home_player_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Predict Starting Lineup (Away Team)"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="16dp"/>
-
-        <Spinner
-            android:id="@+id/away_player_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"/>
-
-        <Spinner
-            android:id="@+id/away_player_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"/>
-
-        <Button
-            android:id="@+id/submit_prediction"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Submit Prediction"
-            android:textSize="14sp"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp"/>
-
-    </LinearLayout>
-</ScrollView>
+    </androidx.core.widget.NestedScrollView>
+</FrameLayout>

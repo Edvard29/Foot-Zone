@@ -91,9 +91,9 @@ public class MainActivity extends BaseActivity {
     private boolean isDateOnOrAfterTarget(String matchDate) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date target = sdf.parse("2025-04-01"); // Фильтр с 1 апреля 2025 года
-            Date match = sdf.parse(matchDate.substring(0, 10)); // Берем только дату (без времени)
-            return match.compareTo(target) >= 0; // Возвращаем true, если дата матча >= 2025-04-01
+            Date target = sdf.parse("2025-05-01"); // Фильтр с 9 апреля 2025 года
+            Date match = sdf.parse(matchDate.substring(0, 10)); // Берем только дату
+            return match.compareTo(target) >= 0;
         } catch (Exception e) {
             Log.e("MainActivity", "Date parse error for " + matchDate + ": " + e.getMessage());
             return false;
@@ -138,12 +138,14 @@ public class MainActivity extends BaseActivity {
                         intent.putExtra("matchTitle", match.getHomeTeam() + " vs " + match.getAwayTeam());
                         intent.putExtra("matchDate", match.getDate());
                         intent.putExtra("matchStatus", match.getStatus());
+                        intent.putExtra("homeTeamId", match.getHomeTeamId());
+                        intent.putExtra("awayTeamId", match.getAwayTeamId());
                         startActivity(intent);
                     }
                 });
                 recyclerView.setAdapter(matchAdapter);
                 if (allMatches.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "No matches available", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Нет доступных матчей", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -170,18 +172,18 @@ public class MainActivity extends BaseActivity {
                         intent.putExtra("awayLineup", awayLineup);
                         startActivity(intent);
                     } else {
-                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Lineups not available", Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Составы недоступны", Toast.LENGTH_SHORT).show());
                     }
                 } catch (Exception e) {
-                    Log.e("MainActivity", "Error parsing lineups: " + e.getMessage());
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error loading lineups", Toast.LENGTH_SHORT).show());
+                    Log.e("MainActivity", "Ошибка парсинга составов: " + e.getMessage());
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Ошибка загрузки составов", Toast.LENGTH_SHORT).show());
                 }
             }
 
             @Override
             public void onFailure(String errorMessage) {
-                Log.e("MainActivity", "Error fetching lineups: " + errorMessage);
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to load lineups", Toast.LENGTH_SHORT).show());
+                Log.e("MainActivity", "Ошибка получения составов: " + errorMessage);
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Не удалось загрузить составы", Toast.LENGTH_SHORT).show());
             }
         });
     }
@@ -214,18 +216,18 @@ public class MainActivity extends BaseActivity {
                         intent.putExtra("fouls", fouls);
                         startActivity(intent);
                     } else {
-                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Statistics not available", Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Статистика недоступна", Toast.LENGTH_SHORT).show());
                     }
                 } catch (Exception e) {
-                    Log.e("MainActivity", "Error parsing stats: " + e.getMessage());
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error loading stats", Toast.LENGTH_SHORT).show());
+                    Log.e("MainActivity", "Ошибка парсинга статистики: " + e.getMessage());
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Ошибка загрузки статистики", Toast.LENGTH_SHORT).show());
                 }
             }
 
             @Override
             public void onFailure(String errorMessage) {
-                Log.e("MainActivity", "Error fetching stats: " + errorMessage);
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to load stats", Toast.LENGTH_SHORT).show());
+                Log.e("MainActivity", "Ошибка получения статистики: " + errorMessage);
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Не удалось загрузить статистику", Toast.LENGTH_SHORT).show());
             }
         });
     }
@@ -264,7 +266,7 @@ public class MainActivity extends BaseActivity {
                     Date date2 = sdf.parse(match2.getDate());
                     return date1.compareTo(date2);
                 } catch (Exception e) {
-                    Log.e("MainActivity", "Sort error: " + e.getMessage());
+                    Log.e("MainActivity", "Ошибка сортировки: " + e.getMessage());
                     return 0;
                 }
             }

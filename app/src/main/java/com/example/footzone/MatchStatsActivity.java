@@ -2,19 +2,20 @@ package com.example.footzone;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 public class MatchStatsActivity extends AppCompatActivity {
 
+    private static final String TAG = "MatchStatsActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_match_stats);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -38,14 +39,24 @@ public class MatchStatsActivity extends AppCompatActivity {
         String cornersData = intent.getStringExtra("corners");
         String foulsData = intent.getStringExtra("fouls");
 
-        // Установка данных
-        matchTeams.setText(homeTeam + " vs " + awayTeam);
-        matchDate.setText(date);
-        possession.setText("Possession: " + possessionData);
-        shotsOnGoal.setText("Shots on Goal: " + shotsOnGoalData);
-        shotsOffGoal.setText("Shots off Goal: " + shotsOffGoalData);
-        corners.setText("Corners: " + cornersData);
-        fouls.setText("Fouls: " + foulsData);
+        // Логирование данных
+        Log.d(TAG, "Данные Intent: homeTeam=" + homeTeam + ", awayTeam=" + awayTeam + ", date=" + date +
+                ", possession=" + possessionData + ", shotsOnGoal=" + shotsOnGoalData);
+
+        // Проверка и установка данных
+        if (homeTeam != null && awayTeam != null) {
+            matchTeams.setText(homeTeam + " vs " + awayTeam);
+        } else {
+            matchTeams.setText("Неизвестные команды");
+            Log.w(TAG, "Отсутствуют данные о командах");
+        }
+
+        matchDate.setText(date != null ? date : "Неизвестная дата");
+        possession.setText(possessionData != null ? "Владение мячом: " + possessionData : "Владение мячом: Н/Д");
+        shotsOnGoal.setText(shotsOnGoalData != null ? "Удары в створ: " + shotsOnGoalData : "Удары в створ: Н/Д");
+        shotsOffGoal.setText(shotsOffGoalData != null ? "Удары мимо: " + shotsOffGoalData : "Удары мимо: Н/Д");
+        corners.setText(cornersData != null ? "Угловые: " + cornersData : "Угловые: Н/Д");
+        fouls.setText(foulsData != null ? "Фолы: " + foulsData : "Фолы: Н/Д");
     }
 
     @Override

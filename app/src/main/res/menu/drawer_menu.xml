@@ -4,6 +4,10 @@
         android:title="Главная"
         android:icon="@drawable/ic_table"/>
     <item
+        android:id="@+id/nav_user"
+        android:title="Пользователь"
+        android:icon="@drawable/ic_default_avatar"/>
+    <item
         android:id="@+id/nav_transfers"
         android:title="Трансферы"
         android:icon="@drawable/ic_transfer"/>

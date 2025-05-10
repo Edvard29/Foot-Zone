@@ -13,14 +13,7 @@
         android:background="@color/background">
 
         <!-- Toolbar (верхняя панель) -->
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/toolbar_color"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:title="FootZone"
-            android:titleTextColor="@android:color/white"/>
+\
 
         <!-- Основной контент: список матчей -->
         <androidx.recyclerview.widget.RecyclerView

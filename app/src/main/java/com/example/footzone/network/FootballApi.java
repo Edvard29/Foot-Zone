@@ -1,13 +1,10 @@
 package com.example.footzone.network;
 
 import android.util.Log;
-
-import com.example.footzone.model.TeamStanding;
 import com.example.footzone.model.Match;
+import com.example.footzone.model.TeamStanding;
 import com.example.footzone.model.Transfer;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,101 +12,91 @@ import java.util.List;
 public class FootballApi {
     public static List<Match> parseMatches(String jsonData) {
         List<Match> matches = new ArrayList<>();
-
         try {
             JSONObject jsonObject = new JSONObject(jsonData);
             JSONArray responseArray = jsonObject.getJSONArray("response");
+            Log.d("FootballApi", "Получено " + responseArray.length() + " матчей в ответе");
 
             for (int i = 0; i < responseArray.length(); i++) {
-                JSONObject matchObject = responseArray.getJSONObject(i);
-                JSONObject teams = matchObject.getJSONObject("teams");
-                JSONObject goals = matchObject.getJSONObject("goals");
-                JSONObject score = matchObject.getJSONObject("score");
+                JSONObject fixture = responseArray.getJSONObject(i);
+                JSONObject fixtureData = fixture.getJSONObject("fixture");
+                JSONObject teams = fixture.getJSONObject("teams");
+                JSONObject goals = fixture.getJSONObject("goals");
+                JSONArray events = fixture.optJSONArray("events");
 
-                // Получаем дату и ID матча
-                JSONObject fixture = matchObject.getJSONObject("fixture");
-                String date = fixture.getString("date");
-                int fixtureId = fixture.getInt("id"); // <-- добавлено
+                String date = fixtureData.getString("date");
+                String status = fixtureData.getJSONObject("status").getString("short");
+                int fixtureId = fixtureData.getInt("id");
 
-                String homeTeam = teams.getJSONObject("home").getString("name");
-                String awayTeam = teams.getJSONObject("away").getString("name");
+                JSONObject homeTeam = teams.getJSONObject("home");
+                JSONObject awayTeam = teams.getJSONObject("away");
 
-                int homeGoals = goals.isNull("home") ? 0 : goals.getInt("home");
-                int awayGoals = goals.isNull("away") ? 0 : goals.getInt("away");
+                String homeTeamName = homeTeam.getString("name");
+                int homeTeamId = homeTeam.getInt("id");
+                String homeTeamLogo = homeTeam.getString("logo");
 
-                if (score.has("fulltime") && !score.isNull("fulltime")) {
-                    JSONObject fulltime = score.getJSONObject("fulltime");
-                    homeGoals = fulltime.isNull("home") ? homeGoals : fulltime.getInt("home");
-                    awayGoals = fulltime.isNull("away") ? awayGoals : fulltime.getInt("away");
+                String awayTeamName = awayTeam.getString("name");
+                int awayTeamId = awayTeam.getInt("id");
+                String awayTeamLogo = awayTeam.getString("logo");
+
+                int homeScore = goals.isNull("home") ? 0 : goals.getInt("home");
+                int awayScore = goals.isNull("away") ? 0 : goals.getInt("away");
+
+                // Парсинг голов
+                List<Match.Goal> homeGoals = new ArrayList<>();
+                List<Match.Goal> awayGoals = new ArrayList<>();
+                if (events != null) {
+                    Log.d("FootballApi", "Матч ID " + fixtureId + ": найдено " + events.length() + " событий");
+                    for (int j = 0; j < events.length(); j++) {
+                        JSONObject event = events.getJSONObject(j);
+                        String eventType = event.optString("type", "");
+                        String detail = event.optString("detail", "");
+                        Log.d("FootballApi", "Событие " + j + ": type=" + eventType + ", detail=" + detail);
+
+                        if (eventType.equals("Goal") && !detail.equals("Own Goal")) {
+                            JSONObject time = event.optJSONObject("time");
+                            int minute = time != null ? time.optInt("elapsed", 0) : 0;
+                            JSONObject player = event.optJSONObject("player");
+                            String playerName = player != null ? player.optString("name", "Неизвестный игрок") : "Неизвестный игрок";
+                            JSONObject team = event.optJSONObject("team");
+                            int teamId = team != null ? team.optInt("id", -1) : -1;
+
+                            Log.d("FootballApi", "Гол: игрок=" + playerName + ", минута=" + minute + ", teamId=" + teamId);
+
+                            if (teamId == homeTeamId) {
+                                homeGoals.add(new Match.Goal(playerName, minute));
+                            } else if (teamId == awayTeamId) {
+                                awayGoals.add(new Match.Goal(playerName, minute));
+                            }
+                        }
+                    }
+                } else {
+                    Log.w("FootballApi", "Матч ID " + fixtureId + ": массив events отсутствует или пуст");
                 }
 
-                String status = fixture.getJSONObject("status").getString("short");
+                Log.d("FootballApi", "Матч ID " + fixtureId + ": Домашние голы=" + homeGoals.size() + ", Гостевые голы=" + awayGoals.size());
 
-                Match match = new Match(date, homeTeam, awayTeam, homeGoals, awayGoals, status, fixtureId);
+                Match match = new Match(
+                        date,
+                        homeTeamName,
+                        awayTeamName,
+                        homeScore,
+                        awayScore,
+                        status,
+                        fixtureId,
+                        homeTeamId,
+                        awayTeamId,
+                        homeTeamLogo,
+                        awayTeamLogo,
+                        homeGoals,
+                        awayGoals
+                );
                 matches.add(match);
             }
+            Log.d("FootballApi", "Успешно спарсено " + matches.size() + " матчей");
         } catch (Exception e) {
-            Log.e("FootballApi", "Error parsing matches", e);
+            Log.e("FootballApi", "Ошибка парсинга матчей: " + e.getMessage(), e);
         }
         return matches;
-    }
-
-
-    public static ArrayList<TeamStanding> parseStandings(String jsonData) {
-        ArrayList<TeamStanding> standings = new ArrayList<>();
-        try {
-            JSONObject jsonObject = new JSONObject(jsonData);
-            JSONArray response = jsonObject.getJSONArray("response");
-
-            for (int j = 0; j < response.length(); j++) {
-                JSONObject leagueObj = response.getJSONObject(j);
-                JSONObject league = leagueObj.getJSONObject("league");
-                String leagueName = league.getString("name");
-                JSONArray standingsArray = league.getJSONArray("standings").getJSONArray(0);
-
-                // Добавляем информацию о лиге только один раз
-                if (j == 0) {
-                    standings.add(new TeamStanding("League: " + leagueName, true, 0)); // Заголовок лиги
-                }
-
-                // Перебираем список команд в лиге
-                for (int i = 0; i < standingsArray.length(); i++) {
-                    JSONObject teamObj = standingsArray.getJSONObject(i);
-                    JSONObject team = teamObj.getJSONObject("team");
-                    String teamName = team.getString("name");
-                    int points = teamObj.getInt("points");
-
-                    // Добавляем каждую команду
-                    standings.add(new TeamStanding(teamName, false, points));
-                }
-            }
-        } catch (Exception e) {
-            Log.e("FootballApi", "Error parsing standings", e);
-        }
-        return standings;
-    }
-
-
-
-
-    public static List<Transfer> parseTransfers(String jsonData) {
-        List<Transfer> transfers = new ArrayList<>();
-        try {
-            JSONObject jsonObject = new JSONObject(jsonData);
-            JSONArray transferArray = jsonObject.getJSONArray("transfers");
-
-            for (int i = 0; i < transferArray.length(); i++) {
-                JSONObject transferObj = transferArray.getJSONObject(i);
-                String playerName = transferObj.getString("player_name");
-                String fromTeam = transferObj.getString("from_team");
-                String toTeam = transferObj.getString("to_team");
-                String transferDate = transferObj.getString("transfer_date");
-
-                transfers.add(new Transfer(playerName, fromTeam, toTeam, transferDate));
-            }
-        } catch (JSONException e) {
-            Log.e("ApiClient", "Error parsing transfers", e);
-        }
-        return transfers;
     }
 }

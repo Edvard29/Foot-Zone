@@ -1,7 +1,9 @@
 package com.example.footzone;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -46,7 +48,6 @@ public class StandingsActivity extends AppCompatActivity {
         leagueSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                // Выбираем лигу по её позиции в списке
                 selectedLeagueId = getLeagueId(position);
                 loadStandings(selectedLeagueId);
             }
@@ -63,39 +64,60 @@ public class StandingsActivity extends AppCompatActivity {
     }
 
     private int getLeagueId(int position) {
-        // Соответствие позиции в Spinner ID лиги
-        int[] leagueIds = {39, 61, 78, 140, 135}; // Пример ID лиг
+        int[] leagueIds = {39, 61, 78, 140, 135}; // ID лиг
         return leagueIds[position];
     }
 
     private void loadStandings(int leagueId) {
-        // Загружаем таблицу для выбранной лиги
         new Thread(() -> {
             ArrayList<TeamStanding> standings = new ArrayList<>();
             String jsonData = ApiClient.getFootballDataStandings(leagueId);
+            Log.d("StandingsActivity", "JSON для лиги " + leagueId + ": " + jsonData.substring(0, Math.min(jsonData.length(), 1000)));
 
             try {
                 JSONObject jsonObject = new JSONObject(jsonData);
                 JSONArray response = jsonObject.getJSONArray("response");
+                if (response.length() == 0) {
+                    Log.w("StandingsActivity", "Пустой ответ для лиги " + leagueId);
+                    return;
+                }
                 JSONObject league = response.getJSONObject(0);
                 JSONObject leagueInfo = league.getJSONObject("league");
                 JSONArray leagueStandings = leagueInfo.getJSONArray("standings").getJSONArray(0);
-                standings.add(new TeamStanding("League: " + leagueInfo.getString("name"), true, 0));
+                standings.add(new TeamStanding("Лига: " + leagueInfo.getString("name"), true));
 
                 for (int i = 0; i < leagueStandings.length(); i++) {
                     JSONObject team = leagueStandings.getJSONObject(i);
-                    String teamName = team.getJSONObject("team").getString("name");
+                    JSONObject teamInfo = team.getJSONObject("team");
+                    String teamName = teamInfo.getString("name");
+                    String logoUrl = teamInfo.getString("logo");
                     int rank = team.getInt("rank");
                     int points = team.getInt("points");
-                    standings.add(new TeamStanding(rank + ". " + teamName, points));
+                    JSONObject stats = team.getJSONObject("all");
+                    int played = stats.getInt("played");
+                    int wins = stats.getInt("win");
+                    int losses = stats.getInt("lose");
+
+                    standings.add(new TeamStanding(
+                            rank + ". " + teamName,
+                            points,
+                            logoUrl,
+                            played,
+                            wins,
+                            losses
+                    ));
+                    Log.d("StandingsActivity", "Команда: " + teamName + ", Логотип: " + logoUrl + ", Сыграно: " + played + ", Победы: " + wins + ", Поражения: " + losses);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("StandingsActivity", "Ошибка парсинга: " + e.getMessage(), e);
             }
 
             runOnUiThread(() -> {
                 adapter = new StandingsAdapter(standings);
                 recyclerView.setAdapter(adapter);
+                recyclerView.setLayoutAnimation(AnimationUtils.loadLayoutAnimation(
+                        recyclerView.getContext(), R.anim.layout_animation_fall_down));
+                recyclerView.scheduleLayoutAnimation();
             });
         }).start();
     }

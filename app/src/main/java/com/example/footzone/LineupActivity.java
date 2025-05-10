@@ -1,21 +1,17 @@
 package com.example.footzone;
 
 import android.os.Bundle;
-import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
-public class LineupActivity extends AppCompatActivity {
+import android.widget.TextView;
+
+public class LineupActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_lineup);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        // setContentView не нужен, так как вызывается в BaseActivity
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Team Lineups");
         }
 
         TextView homeTeamName = findViewById(R.id.home_team_name);
@@ -37,8 +33,7 @@ public class LineupActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        finish(); // Закрыть активити при нажатии на стрелку "Назад"
-        return true;
+    protected int getLayoutResourceId() {
+        return R.layout.activity_lineup;
     }
 }

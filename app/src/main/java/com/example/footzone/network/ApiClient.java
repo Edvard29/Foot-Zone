@@ -1,5 +1,6 @@
 package com.example.footzone.network;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.example.footzone.model.Footballer;
@@ -10,24 +11,84 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class ApiClient {
+
     private static final String API_KEY = "355b9cae7d0abdea74ef9d7034547159";  // Ваш ключ API
     private static OkHttpClient client = new OkHttpClient();
     private static final ExecutorService executorService = Executors.newFixedThreadPool(3);
+    private static final String BASE_URL = "https://v3.football.api-sports.io/";
+    private final Map<Integer, String> teamLogoMap = new HashMap<>();
+
+    public void fetchTeams(int leagueId, int season, Runnable onSuccess) {
+        new Thread(() -> {
+            try {
+                String endpoint = String.format("teams?league=%d&season=%d", leagueId, season);
+                URL url = new URL(BASE_URL + endpoint);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("x-rapidapi-key", API_KEY);
+                conn.setRequestProperty("Accept", "application/json");
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    reader.close();
+
+                    JSONObject jsonResponse = new JSONObject(response.toString());
+                    JSONArray teamsArray = jsonResponse.getJSONArray("response");
+                    teamLogoMap.clear();
+                    for (int i = 0; i < teamsArray.length(); i++) {
+                        JSONObject teamObj = teamsArray.getJSONObject(i).getJSONObject("team");
+                        int teamId = teamObj.getInt("id");
+                        String logoUrl = teamObj.getString("logo");
+                        teamLogoMap.put(teamId, logoUrl);
+                    }
+                    Log.d("ApiFootballService", "Загружено " + teamLogoMap.size() + " логотипов команд");
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                } else {
+                    Log.e("ApiFootballService", "Ошибка API: код " + responseCode);
+                }
+                conn.disconnect();
+            } catch (Exception e) {
+                Log.e("ApiFootballService", "Ошибка при загрузке команд: " + e.getMessage(), e);
+            }
+        }).start();
+    }
+
+    @SuppressLint("NewApi")
+    public String getTeamLogoUrl(int teamId) {
+        return teamLogoMap.getOrDefault(teamId, null);
+    }
+
 
     public static void getMatches(int leagueId, ApiResponseCallback callback) {
         executorService.execute(() -> {
@@ -55,6 +116,7 @@ public class ApiClient {
             }
         });
     }
+
     public static void getMatchStatistics(int fixtureId, ApiResponseCallback callback) {
         executorService.execute(() -> {
             String apiUrl = "https://v3.football.api-sports.io/fixtures/statistics?fixture=" + fixtureId;
@@ -117,56 +179,46 @@ public class ApiClient {
     }
 
 
-    public static String getTransfers(int playerId, int teamId, ApiResponseCallback callback) throws Exception {
-        // Твой код для выполнения запроса
-        String url = "https://api-football-v1.p.rapidapi.com/v3/transfers?player=" + playerId + "&team=" + teamId;
 
 
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .addHeader("X-RapidAPI-Key", "YOUR_API_KEY")
-                .build();
+    public static void getTransfers(int season, ApiResponseCallback callback) {
+        String apiUrl = BASE_URL + "transfers?season=" + season;
+        Log.d("ApiClient", "📡 Запрос трансферов: " + apiUrl);
 
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new Exception("Ошибка запроса: " + response.code());
+        executorService.execute(() -> {
+            try {
+                Request request = new Request.Builder()
+                        .url(apiUrl)
+                        .addHeader("x-apisports-key", API_KEY)
+                        .build();
+
+                Response response = client.newCall(request).execute();
+                if (!response.isSuccessful()) {
+                    Log.e("ApiClient", "❌ Ошибка API (трансферы): " + response.code());
+                    callback.onFailure("Ошибка запроса: " + response.code());
+                    return;
+                }
+
+                ResponseBody responseBody = response.body();
+                String result = responseBody != null ? responseBody.string() : null;
+                if (result != null && !result.isEmpty()) {
+                    Log.d("ApiClient", "✅ Ответ API (трансферы): " + result.substring(0, Math.min(result.length(), 100)));
+                    callback.onSuccess(result);
+                } else {
+                    Log.e("ApiClient", "❌ Пустой ответ от API (трансферы)");
+                    callback.onFailure("Пустой ответ от API");
+                }
+            } catch (IOException e) {
+                Log.e("ApiClient", "❌ Ошибка сети (трансферы): " + e.getMessage());
+                callback.onFailure("Ошибка сети: " + e.getMessage());
             }
-            return response.body().string(); // Возвращаем строку с ответом
-        }
+        });
     }
 
 
 
 
-    public static void parseTransfers(String responseBody, ApiResponseCallback callback) {
-        try {
-            JSONObject responseObject = new JSONObject(responseBody);
-            JSONArray transfersArray = responseObject.getJSONArray("response");
 
-            List<Transfer> transfers = new ArrayList<>();
-
-            for (int i = 0; i < transfersArray.length(); i++) {
-                JSONObject transferObject = transfersArray.getJSONObject(i);
-
-                JSONObject playerObject = transferObject.getJSONObject("player");
-                String playerName = playerObject.getString("name");
-
-                JSONObject transferDetails = transferObject.getJSONObject("transfer");
-                String transferDate = transferDetails.optString("date", "N/A");
-                String fromTeam = transferDetails.optString("from_team", "N/A");
-                String toTeam = transferDetails.optString("to_team", "N/A");
-
-                Transfer transfer = new Transfer(playerName, fromTeam, toTeam, transferDate);
-                transfers.add(transfer);
-            }
-
-            callback.onSuccess(transfers.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-            callback.onFailure("Ошибка при разборе данных: " + e.getMessage());
-        }
-    }
 
 
 
@@ -186,6 +238,10 @@ public class ApiClient {
             return null;
         }
     }
+
+
+
+
 
     // Получение команд по лиге и сезону
     public static String getTeamsByLeague(int leagueId, int season) {
@@ -214,7 +270,6 @@ public class ApiClient {
 
     public static void getAssistants(int leagueId, int seasonYear, ApiResponseCallback callback) {
         String apiUrl = "https://v3.football.api-sports.io/players/topassists?league=" + leagueId + "&season=" + seasonYear;
-
         Log.d("ApiClient", "📡 Запрос ассистентов: " + apiUrl);
 
         executeApiRequest(apiUrl, new ApiResponseCallback() {
@@ -318,4 +373,57 @@ public class ApiClient {
 
         return assistLeaders;
     }
+    public static void getSquad(int teamId, ApiResponseCallback callback) {
+        String apiUrl = BASE_URL + "players/squads?team=" + teamId;
+        Log.d("ApiClient", "📡 Requesting squad: " + apiUrl);
+        executeRequest(apiUrl, callback);
+    }
+
+    /**
+     * Получение результатов матча и стартового состава
+     * Эндпоинт: /fixtures/lineups
+     */
+    public static void getMatchResult(int fixtureId, ApiResponseCallback callback) {
+        String apiUrl = BASE_URL + "fixtures/lineups?fixture=" + fixtureId;
+        Log.d("ApiClient", "📡 Requesting match result: " + apiUrl);
+        executeRequest(apiUrl, callback);
+    }
+
+    /**
+     * Выполнение HTTP-запроса
+     */
+    private static void executeRequest(String apiUrl, ApiResponseCallback callback) {
+        executorService.execute(() -> {
+            try {
+                Request request = new Request.Builder()
+                        .url(apiUrl)
+                        .addHeader("x-apisports-key", API_KEY)
+                        .build();
+
+                Response response = client.newCall(request).execute();
+                if (!response.isSuccessful()) {
+                    Log.e("ApiClient", "❌ API error: " + response.code());
+                    callback.onFailure("API request failed with code: " + response.code());
+                    return;
+                }
+
+                ResponseBody responseBody = response.body();
+                String result = responseBody != null ? responseBody.string() : null;
+                if (result != null && !result.isEmpty()) {
+                    Log.d("ApiClient", "✅ API response: " + result.substring(0, Math.min(result.length(), 100)));
+                    callback.onSuccess(result);
+                } else {
+                    Log.e("ApiClient", "❌ Empty response from API");
+                    callback.onFailure("Empty response from API");
+                }
+            } catch (IOException e) {
+                Log.e("ApiClient", "❌ Network error: " + e.getMessage());
+                callback.onFailure("Network error: " + e.getMessage());
+            }
+        });
+    }
+
+
+
+
 }

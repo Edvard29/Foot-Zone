@@ -3,8 +3,7 @@
         <color name="background_color">#1E1E1E</color>
         <color name="white">#FFFFFF</color>
         <color name="black">#000000</color>
-        <color name="dark_gray">#AAAAAA</color>
-        <color name="gray">#CCCCCC</color>
+
         <color name="green">#4CAF50</color>
         <color name="teal_700">#00796B</color>
         <color name="golden_yellow">#FFB81C</color>
@@ -13,18 +12,63 @@
         <color name="navigation_menu_background">#34495E</color> <!-- Фон меню навигации -->
         <color name="button_color">#E74C3C</color> <!-- Цвет кнопок -->
         <!-- Цвет фона карточки -->
-        <color name="card_background">#F5F5F5</color>
 
-        <!-- Цвет текста для даты -->
-        <color name="date_text_color">#9E9E9E</color>
-
-        <!-- Цвет текста для информации о командах -->
-        <color name="team_info_text_color">#212121</color>
 
         <!-- Дополнительные цвета -->
         <color name="highlight_color">#FF5722</color>
         <color name="accent_color">#388E3C</color>
         <color name="purple_500">#6200EE</color>
+        <color name="primary_color">#3F51B5</color> <!-- Индиго для акцентов -->
+
+        <color name="primary_text">#212121</color> <!-- Основной текст -->
+        <color name="secondary_text">#757575</color> <!-- Вторичный текст -->
+        <color name="card_background">#1A3C34</color>
+        <color name="date_text_color">#B0BEC5</color>
+        <color name="team_info_text_color">#FFFFFF</color>
+        <color name="button_background">#2E7D32</color>
+        <color name="gray">#B0BEC5</color>
+        <color name="dark_gray">#78909C</color>
+
+        <color name="text_primary">#FFFFFF</color>
+
+
+        <!-- Цвета для тёмной темы -->
+        <color name="background_dark">#121212</color>
+        <color name="card_background_dark">#1E1E1E</color>
+        <color name="primary_text_dark">#FFFFFF</color>
+        <color name="secondary_text_dark">#B0B0B0</color>
+        <color name="team_info_text_color_dark">#8C9EFF</color>
+
+
+
+                <color name="surface">#1A3C34</color>
+
+                <color name="primary">#2E7D32</color>
+
+
+
+
+
+        <!-- Фон -->
+        <color name="background_grey">#F5F6F5</color> <!-- Светло-серый фон -->
+
+        <!-- Toolbar -->
+        <color name="toolbar_green">#2E7D32</color> <!-- Тёмно-зелёный, как футбольное поле -->
+
+        <!-- CardView -->
+        <color name="card_background_white">#FFFFFF</color> <!-- Белый фон карточек -->
+
+        <!-- Текст -->
+        <color name="team_text_blue">#1976D2</color> <!-- Синий для названия команд -->
+        <color name="date_text_grey">#757575</color> <!-- Серый для даты -->
+        <color name="stat_text_dark">#212121</color> <!-- Тёмный для статистики -->
+        <color name="primary_variant">#3700B3</color>
+        <color name="on_surface">#212121</color>
+        <color name="on_primary">#FFFFFF</color>
+        <color name="accent">#03DAC5</color>
+        <color name="header_background">#E8EAF6</color>
+
+
 
 
 </resources>

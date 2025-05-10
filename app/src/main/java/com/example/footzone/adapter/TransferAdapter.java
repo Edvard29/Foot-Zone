@@ -4,20 +4,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.recyclerview.widget.RecyclerView;
+import com.example
 
-import com.example.footzone.R;
+        .footzone.R;
 import com.example.footzone.model.Transfer;
-
 import java.util.List;
 
 public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.TransferViewHolder> {
+    private List<Transfer> transfers;
 
-    private List<Transfer> transferList;
-
-    public TransferAdapter(List<Transfer> transferList) {
-        this.transferList = transferList;
+    public TransferAdapter(List<Transfer> transfers) {
+        this.transfers = transfers;
     }
 
     @Override
@@ -29,27 +27,29 @@ public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.Transf
 
     @Override
     public void onBindViewHolder(TransferViewHolder holder, int position) {
-        Transfer transfer = transferList.get(position);
+        Transfer transfer = transfers.get(position);
         holder.playerName.setText(transfer.getPlayerName());
         holder.fromTeam.setText("From: " + transfer.getFromTeam());
         holder.toTeam.setText("To: " + transfer.getToTeam());
-        holder.transferDate.setText("Date: " + transfer.getTransferDate());
+        holder.date.setText("Date: " + transfer.getDate());
+        holder.fee.setText("Fee: " + transfer.getFee());
     }
 
     @Override
     public int getItemCount() {
-        return transferList.size();
+        return transfers.size();
     }
 
-    public static class TransferViewHolder extends RecyclerView.ViewHolder {
-        TextView playerName, fromTeam, toTeam, transferDate;
+    static class TransferViewHolder extends RecyclerView.ViewHolder {
+        TextView playerName, fromTeam, toTeam, date, fee;
 
-        public TransferViewHolder(View itemView) {
+        TransferViewHolder(View itemView) {
             super(itemView);
-            playerName = itemView.findViewById(R.id.player_name);
-            fromTeam = itemView.findViewById(R.id.from_team);
-            toTeam = itemView.findViewById(R.id.to_team);
-            transferDate = itemView.findViewById(R.id.transfer_date);
+            playerName = itemView.findViewById(R.id.transfer_player_name);
+            fromTeam = itemView.findViewById(R.id.transfer_from_team);
+            toTeam = itemView.findViewById(R.id.transfer_to_team);
+            date = itemView.findViewById(R.id.transfer_date);
+            fee = itemView.findViewById(R.id.transfer_fee);
         }
     }
 }

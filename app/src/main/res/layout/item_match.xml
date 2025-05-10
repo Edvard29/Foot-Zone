@@ -1,38 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:layout_gravity="center"
-    android:elevation="8dp"
-    android:background="@color/card_background"
+    app:cardBackgroundColor="#1A3C34"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="8dp"
     android:padding="12dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/match_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Дата матча"
-            android:textColor="@color/date_text_color"
+            android:textColor="#B0BEC5"
             android:textSize="14sp"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <ImageView
+                android:id="@+id/home_team_logo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="Логотип домашней команды"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:id="@+id/match_info"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Team A 2 : 1 Team B"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center" />
+
+            <ImageView
+                android:id="@+id/away_team_logo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="Логотип гостевой команды"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:layout_marginStart="12dp" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/match_info"
-            android:layout_width="wrap_content"
+            android:id="@+id/goal_scorers"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Team A 2 : 1 Team B"
-            android:textColor="@color/team_info_text_color"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="6dp"
-            android:layout_marginTop="20dp"/>
+            android:text="Голы: \nДом: Игрок1 (10'), Игрок2 (45')\nГост: Игрок3 (60')"
+            android:textColor="#B0BEC5"
+            android:textSize="12sp"
+            android:layout_marginBottom="12dp"
+            android:gravity="center" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,18 +90,24 @@
                     android:id="@+id/btn_lineups"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Lineups"
+                    android:text="Составы"
                     android:textSize="12sp"
-                    android:padding="4dp"
-                    android:layout_marginBottom="4dp"/>
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#2E7D32"
+                    android:padding="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:cornerRadius="8dp" />
 
                 <Button
                     android:id="@+id/btn_stats"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Stats"
+                    android:text="Статистика"
                     android:textSize="12sp"
-                    android:padding="4dp"/>
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#2E7D32"
+                    android:padding="8dp"
+                    app:cornerRadius="8dp" />
 
             </LinearLayout>
 
@@ -77,18 +122,24 @@
                     android:id="@+id/btn_chat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Chat"
+                    android:text="Чат"
                     android:textSize="12sp"
-                    android:padding="4dp"
-                    android:layout_marginBottom="4dp"/>
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#2E7D32"
+                    android:padding="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:cornerRadius="8dp" />
 
                 <Button
                     android:id="@+id/btn_predict"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Predict"
+                    android:text="Прогноз"
                     android:textSize="12sp"
-                    android:padding="4dp"/>
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#2E7D32"
+                    android:padding="8dp"
+                    app:cornerRadius="8dp" />
 
             </LinearLayout>
 

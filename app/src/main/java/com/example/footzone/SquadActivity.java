@@ -1,6 +1,7 @@
 package com.example.footzone;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -61,7 +62,7 @@ public class SquadActivity extends AppCompatActivity {
                         teamMap.put(name, id);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("SquadActivity", "Ошибка загрузки команд: " + e.getMessage(), e);
                 }
             }
 
@@ -87,7 +88,7 @@ public class SquadActivity extends AppCompatActivity {
     private void loadSquad(int teamId) {
         new Thread(() -> {
             playerList.clear();
-            String jsonData = ApiClient.getTeamSquad(teamId); // <-- Заменено на правильный метод
+            String jsonData = ApiClient.getTeamSquad(teamId);
             if (jsonData != null) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonData);
@@ -99,12 +100,18 @@ public class SquadActivity extends AppCompatActivity {
                             String name = playerObj.getString("name");
                             String position = playerObj.getString("position");
                             int age = playerObj.getInt("age");
-                            playerList.add(new Player(name, position, age));
+                            String photoUrl = playerObj.optString("photo", null); // Извлекаем photo
+                            playerList.add(new Player(name, position, age, photoUrl));
+                            Log.d("SquadActivity", "Игрок: " + name + ", Фото: " + photoUrl);
                         }
+                    } else {
+                        Log.w("SquadActivity", "Пустой список игроков для команды ID: " + teamId);
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("SquadActivity", "Ошибка парсинга состава: " + e.getMessage(), e);
                 }
+            } else {
+                Log.w("SquadActivity", "Нет данных для команды ID: " + teamId);
             }
 
             runOnUiThread(() -> {
