@@ -18,5 +18,8 @@
         <item>Serie A</item>
     </string-array>
 
+        <string name="your_points">Your Points: %d</string>
+
+
 
 </resources>

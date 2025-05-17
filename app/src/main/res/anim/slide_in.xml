@@ -4,3 +4,7 @@
     android:fromYDelta="100%"
     android:toYDelta="0%"
     android:duration="300" />
+    <?xml version="1.0" encoding="utf-8"?>
+    <!--
+      Animation for user points card (slides in from top).
+    -->

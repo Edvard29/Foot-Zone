@@ -63,9 +63,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         }else if (id == R.id.nav_user) {
             startActivity(new Intent(this, UserActivity.class));
         }
-        else if (id == R.id.nav_transfers) {
-            startActivity(new Intent(this, TransfersActivity.class));
-        } else if (id == R.id.nav_squad) {
+        else if (id == R.id.nav_squad) {
             startActivity(new Intent(this, SquadActivity.class));
         } else if (id == R.id.nav_standigs) {
             startActivity(new Intent(this, StandingsActivity.class));
@@ -76,6 +74,8 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(this, TopScorersActivity.class));
         }else if (id == R.id.nav_assists) {
             startActivity(new Intent(this, AssistLeadersActivity.class));
+        }else if (id == R.id.nav_leader) {
+            startActivity(new Intent(this, LeaderboardActivity.class));
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);

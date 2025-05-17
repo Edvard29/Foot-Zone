@@ -2,33 +2,19 @@ package com.example.footzone.model;
 
 public class Footballer {
     private String name;
-    private String team;
-    private int goals;  // Количество голов
-    private int assists;  // Количество ассистов
+    private int goals;
+    private int assists;
+    private String imageUrl;
 
-    public Footballer(String name, String team, int goals, int assists) {
+    public Footballer(String name, int goals, int assists, String imageUrl) {
         this.name = name;
-        this.team = team;
         this.goals = goals;
         this.assists = assists;
+        this.imageUrl = imageUrl;
     }
-
-    // Конструктор для ассистов (если нужно)
-    public Footballer(String name, String team, int assists) {
-        this.name = name;
-        this.team = team;
-        this.goals = 0;  // Если ассисты, но нет голов
-        this.assists = assists;
-    }
-
-
 
     public String getName() {
         return name;
-    }
-
-    public String getTeam() {
-        return team;
     }
 
     public int getGoals() {
@@ -39,8 +25,7 @@ public class Footballer {
         return assists;
     }
 
-    // Метод для отображения статистики
-    public String getStat() {
-        return "Голы: " + goals + " Ассисты: " + assists;
+    public String getImageUrl() {
+        return imageUrl;
     }
 }

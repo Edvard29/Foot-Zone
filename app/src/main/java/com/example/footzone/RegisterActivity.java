@@ -1,64 +1,146 @@
+
+
 package com.example.footzone;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
+import android.text.TextUtils;
+import android.util.Log;
+import android.util.Patterns;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import org.json.JSONObject;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class RegisterActivity extends AppCompatActivity {
-    private EditText editTextEmail, editTextPassword;
-    private Button buttonRegister;
-    private FirebaseAuth mAuth;
+public class RegisterActivity extends BaseActivity {
+    private static final String TAG = "RegisterActivity";
+    private TextInputEditText editTextEmail, editTextPassword, editTextConfirmPassword;
+    private MaterialButton buttonRegister;
+    private MaterialCardView registerCard;
+    private FirebaseAuth auth;
+    private DatabaseReference usersRef;
+    private SharedPreferences prefs;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Register");
+        }
 
-        mAuth = FirebaseAuth.getInstance();
+        // Initialize UI
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
+        editTextConfirmPassword = findViewById(R.id.editTextConfirmPassword);
         buttonRegister = findViewById(R.id.buttonRegister);
+        registerCard = findViewById(R.id.register_card);
 
+        // Initialize Firebase and SharedPreferences
+        auth = FirebaseAuth.getInstance();
+        usersRef = FirebaseDatabase.getInstance().getReference("users");
+        prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+
+        // Apply animation
+        registerCard.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+        buttonRegister.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+
+        // Set up button listener
         buttonRegister.setOnClickListener(v -> registerUser());
+    }
+
+    @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_register;
     }
 
     private void registerUser() {
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
+        String confirmPassword = editTextConfirmPassword.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Введите email и пароль", Toast.LENGTH_SHORT).show();
+        // Input validation
+        if (TextUtils.isEmpty(email)) {
+            editTextEmail.setError("Email is required");
+            return;
+        }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            editTextEmail.setError("Enter a valid email address");
+            return;
+        }
+        if (TextUtils.isEmpty(password)) {
+            editTextPassword.setError("Password is required");
+            return;
+        }
+        if (password.length() < 6) {
+            editTextPassword.setError("Password must be at least 6 characters");
+            return;
+        }
+        if (TextUtils.isEmpty(confirmPassword)) {
+            editTextConfirmPassword.setError("Please confirm your password");
+            return;
+        }
+        if (!password.equals(confirmPassword)) {
+            editTextConfirmPassword.setError("Passwords do not match");
             return;
         }
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
+        // Register with Firebase Authentication
+        auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
+                        FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
+                            // Send email verification
                             user.sendEmailVerification()
                                     .addOnCompleteListener(verificationTask -> {
-                                        if (verificationTask.isSuccessful()) {
-                                            Toast.makeText(this, "Регистрация успешна! Подтвердите email.", Toast.LENGTH_LONG).show();
-                                        } else {
-                                            Toast.makeText(this, "Ошибка при отправке письма: " + verificationTask.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                        if (!verificationTask.isSuccessful()) {
+                                            Toast.makeText(this, "Error sending verification email: " + verificationTask.getException().getMessage(), Toast.LENGTH_LONG).show();
                                         }
                                     });
-                        }
 
-                        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-                        finish();
+                            // Store user data
+                            String username = email.split("@")[0]; // Use email prefix as username
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("username", username);
+                            editor.putString("email", email);
+                            editor.apply();
+
+                            usersRef.child(username).child("email").setValue(email);
+                            usersRef.child(username).child("registered").setValue(true);
+                            usersRef.child(username).child("points").setValue(0L);
+                            usersRef.child(username).child("predictionCount").setValue(0L);
+
+                        }
                     } else {
-                        Toast.makeText(this, "Ошибка: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+
+
+    private void navigateToLogin() {
+        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 }

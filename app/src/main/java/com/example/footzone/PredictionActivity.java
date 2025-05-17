@@ -9,11 +9,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.footzone.adapter.PredPlayerAdapter;
 import com.example.footzone.model.PredPlayer;
 import com.example.footzone.model.Prediction;
@@ -40,6 +42,7 @@ public class PredictionActivity extends BaseActivity {
     private RecyclerView homeLineupRecyclerView, awayLineupRecyclerView;
     private Button submitButton;
     private ProgressBar progressBar;
+    private ImageView homeTeamLogo, awayTeamLogo;
     private DatabaseReference predictionsRef, usersRef;
     private SharedPreferences prefs;
     private int fixtureId;
@@ -53,7 +56,6 @@ public class PredictionActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setContentView не вызываем, так как это делает BaseActivity
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("Make Prediction");
         }
@@ -66,6 +68,8 @@ public class PredictionActivity extends BaseActivity {
         awayLineupRecyclerView = findViewById(R.id.away_lineup_recycler_view);
         submitButton = findViewById(R.id.submit_prediction);
         progressBar = findViewById(R.id.progress_bar);
+        homeTeamLogo = findViewById(R.id.home_team_logo);
+        awayTeamLogo = findViewById(R.id.away_team_logo);
 
         // Получение данных из Intent
         fixtureId = getIntent().getIntExtra("fixtureId", -1);
@@ -159,6 +163,8 @@ public class PredictionActivity extends BaseActivity {
             homeLineupRecyclerView.setVisibility(View.GONE);
             awayLineupRecyclerView.setVisibility(View.GONE);
             submitButton.setVisibility(View.GONE);
+            homeTeamLogo.setVisibility(View.GONE);
+            awayTeamLogo.setVisibility(View.GONE);
             return;
         }
 
@@ -199,6 +205,7 @@ public class PredictionActivity extends BaseActivity {
         submitButton.setOnClickListener(v -> submitPrediction());
 
         loadSquads();
+        loadTeamLogos();
     }
 
     private boolean canMakePrediction() {
@@ -222,13 +229,15 @@ public class PredictionActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Long predictionCount = dataSnapshot.getValue(Long.class);
                 int count = predictionCount != null ? predictionCount.intValue() : 0;
-                if (count >= 5) {
+                if (count >= 10) {
                     matchTitle.setText("You have reached the prediction limit of 5 matches!");
                     homeGoals.setVisibility(View.GONE);
                     awayGoals.setVisibility(View.GONE);
                     homeLineupRecyclerView.setVisibility(View.GONE);
                     awayLineupRecyclerView.setVisibility(View.GONE);
                     submitButton.setVisibility(View.GONE);
+                    homeTeamLogo.setVisibility(View.GONE);
+                    awayTeamLogo.setVisibility(View.GONE);
                 }
             }
 
@@ -250,12 +259,51 @@ public class PredictionActivity extends BaseActivity {
                     homeLineupRecyclerView.setVisibility(View.GONE);
                     awayLineupRecyclerView.setVisibility(View.GONE);
                     submitButton.setVisibility(View.GONE);
+                    homeTeamLogo.setVisibility(View.GONE);
+                    awayTeamLogo.setVisibility(View.GONE);
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.e("PredictionActivity", "Error checking prediction: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    private void loadTeamLogos() {
+        ApiClient.getFixtureEvents(fixtureId, new ApiResponseCallback() {
+            @Override
+            public void onSuccess(String jsonData) {
+                try {
+                    JSONObject jsonObject = new JSONObject(jsonData);
+                    JSONObject fixture = jsonObject.getJSONArray("response").getJSONObject(0);
+                    JSONObject teams = fixture.getJSONObject("teams");
+                    String homeLogoUrl = teams.getJSONObject("home").getString("logo");
+                    String awayLogoUrl = teams.getJSONObject("away").getString("logo");
+
+                    runOnUiThread(() -> {
+                        Glide.with(PredictionActivity.this)
+                                .load(homeLogoUrl)
+                                .placeholder(R.drawable.ic_default_team_logo)
+                                .error(R.drawable.ic_default_team_logo)
+                                .into(homeTeamLogo);
+                        Glide.with(PredictionActivity.this)
+                                .load(awayLogoUrl)
+                                .placeholder(R.drawable.ic_default_team_logo)
+                                .error(R.drawable.ic_default_team_logo)
+                                .into(awayTeamLogo);
+                    });
+                } catch (Exception e) {
+                    Log.e("PredictionActivity", "Error parsing team logos: " + e.getMessage());
+                    runOnUiThread(() -> Toast.makeText(PredictionActivity.this, "Failed to load team logos", Toast.LENGTH_SHORT).show());
+                }
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Log.e("PredictionActivity", "Error fetching team logos: " + errorMessage);
+                runOnUiThread(() -> Toast.makeText(PredictionActivity.this, "Error fetching team logos", Toast.LENGTH_SHORT).show());
             }
         });
     }
@@ -274,7 +322,9 @@ public class PredictionActivity extends BaseActivity {
                         JSONObject playerObj = playersArray.getJSONObject(i);
                         int id = playerObj.getInt("id");
                         String name = playerObj.getString("name");
-                        homePlayers.add(new PredPlayer(id, name));
+                        String imageUrl = playerObj.optString("photo", "");
+                        String position = playerObj.optString("position", "Unknown");
+                        homePlayers.add(new PredPlayer(id, name, imageUrl, position));
                     }
                     runOnUiThread(() -> homeLineupRecyclerView.getAdapter().notifyDataSetChanged());
                 } catch (Exception e) {
@@ -301,7 +351,9 @@ public class PredictionActivity extends BaseActivity {
                         JSONObject playerObj = playersArray.getJSONObject(i);
                         int id = playerObj.getInt("id");
                         String name = playerObj.getString("name");
-                        awayPlayers.add(new PredPlayer(id, name));
+                        String imageUrl = playerObj.optString("photo", "");
+                        String position = playerObj.optString("position", "Unknown");
+                        awayPlayers.add(new PredPlayer(id, name, imageUrl, position));
                     }
                     runOnUiThread(() -> {
                         awayLineupRecyclerView.getAdapter().notifyDataSetChanged();
@@ -335,6 +387,38 @@ public class PredictionActivity extends BaseActivity {
 
         if (selectedHomePlayers.size() != 11 || selectedAwayPlayers.size() != 11) {
             Toast.makeText(this, "Please select exactly 11 players for each team", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check for exactly one goalkeeper in each team
+        int homeGoalkeeperCount = 0;
+        int awayGoalkeeperCount = 0;
+
+        for (Integer playerId : selectedHomePlayers) {
+            for (PredPlayer player : homePlayers) {
+                if (player.getId() == playerId && "Goalkeeper".equals(player.getPosition())) {
+                    homeGoalkeeperCount++;
+                    break;
+                }
+            }
+        }
+
+        for (Integer playerId : selectedAwayPlayers) {
+            for (PredPlayer player : awayPlayers) {
+                if (player.getId() == playerId && "Goalkeeper".equals(player.getPosition())) {
+                    awayGoalkeeperCount++;
+                    break;
+                }
+            }
+        }
+
+        if (homeGoalkeeperCount != 1) {
+            Toast.makeText(this, "Please select exactly one goalkeeper for the home team", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (awayGoalkeeperCount != 1) {
+            Toast.makeText(this, "Please select exactly one goalkeeper for the away team", Toast.LENGTH_SHORT).show();
             return;
         }
 

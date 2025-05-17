@@ -11,6 +11,12 @@
         <color name="toolbar_color">#2C3E50</color> <!-- Цвет тулбара -->
         <color name="navigation_menu_background">#34495E</color> <!-- Фон меню навигации -->
         <color name="button_color">#E74C3C</color> <!-- Цвет кнопок -->
+        <color name="card_background_bright">#FFFFFFFF</color> <!-- White cards -->
+        <color name="primary_text_bright">#FF01579B</color> <!-- Dark Blue for primary text -->
+        <color name="secondary_text_bright">#FF0288D1</color> <!-- Cyan for secondary text -->
+        <color name="accent_bright">#FFFF4081</color> <!-- Bright Pink for accents -->
+
+
         <!-- Цвет фона карточки -->
 
 
@@ -44,6 +50,8 @@
                 <color name="surface">#1A3C34</color>
 
                 <color name="primary">#2E7D32</color>
+        <color name="colorPrimary">#FF4CAF50</color>
+        <color name="colorAccent">#FFFF4081</color>
 
 
 

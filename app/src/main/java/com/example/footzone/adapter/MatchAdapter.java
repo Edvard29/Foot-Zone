@@ -42,10 +42,13 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Match match = matchList.get(position);
+        String TAG = "MatchAdapter";
 
+        // Установка даты матча
         holder.matchDate.setText(match.getDate().substring(0, 10));
         holder.matchDate.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.date_text_color));
 
+        // Установка информации о матче
         String score = match.getFormattedScore();
         holder.matchInfo.setText(match.getHomeTeam() + " " + score + " " + match.getAwayTeam());
         holder.matchInfo.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.team_info_text_color));
@@ -73,46 +76,55 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> 
 
         // Отображение голов
         StringBuilder goalText = new StringBuilder("Голы:\n");
+
         // Домашняя команда
-        goalText.append("Дом: ");
+        goalText.append(match.getHomeTeam()).append(": ");
         List<Match.Goal> homeGoals = match.getHomeGoalDetails();
-        Log.d("MatchAdapter", "Матч ID " + match.getFixtureId() + ": Домашние голы=" + (homeGoals != null ? homeGoals.size() : "null"));
+        Log.d(TAG, "Матч ID " + match.getFixtureId() + ": Домашние голы=" + (homeGoals != null ? homeGoals.size() : "null"));
         if (homeGoals == null || homeGoals.isEmpty()) {
-            goalText.append("Нет");
+            goalText.append("Нет голов");
+            Log.w(TAG, "Нет данных о домашних голах для матча ID " + match.getFixtureId());
         } else {
             StringBuilder homeGoalsText = new StringBuilder();
             for (int i = 0; i < homeGoals.size(); i++) {
                 Match.Goal goal = homeGoals.get(i);
-                String goalInfo = goal.getPlayerName() + " (" + goal.getMinute() + "')";
+                String playerName = goal.getPlayerName() != null ? goal.getPlayerName() : "Неизвестный игрок";
+                int minute = goal.getMinute(); // minute is an int, no need for null check
+                String goalInfo = playerName + " (" + minute + "')";
                 homeGoalsText.append(goalInfo);
                 if (i < homeGoals.size() - 1) {
                     homeGoalsText.append(", ");
                 }
-                Log.d("MatchAdapter", "Домашний гол: " + goalInfo);
+                Log.d(TAG, "Домашний гол: " + goalInfo);
             }
             goalText.append(homeGoalsText.toString());
         }
+
         // Гостевая команда
-        goalText.append("\nГост: ");
+        goalText.append("\n").append(match.getAwayTeam()).append(": ");
         List<Match.Goal> awayGoals = match.getAwayGoalDetails();
-        Log.d("MatchAdapter", "Матч ID " + match.getFixtureId() + ": Гостевые голы=" + (awayGoals != null ? awayGoals.size() : "null"));
+        Log.d(TAG, "Матч ID " + match.getFixtureId() + ": Гостевые голы=" + (awayGoals != null ? awayGoals.size() : "null"));
         if (awayGoals == null || awayGoals.isEmpty()) {
-            goalText.append("Нет");
+            goalText.append("Нет голов");
+            Log.w(TAG, "Нет данных о гостевых голах для матча ID " + match.getFixtureId());
         } else {
             StringBuilder awayGoalsText = new StringBuilder();
             for (int i = 0; i < awayGoals.size(); i++) {
                 Match.Goal goal = awayGoals.get(i);
-                String goalInfo = goal.getPlayerName() + " (" + goal.getMinute() + "')";
+                String playerName = goal.getPlayerName() != null ? goal.getPlayerName() : "Неизвестный игрок";
+                int minute = goal.getMinute(); // minute is an int, no need for null check
+                String goalInfo = playerName + " (" + minute + "')";
                 awayGoalsText.append(goalInfo);
                 if (i < awayGoals.size() - 1) {
                     awayGoalsText.append(", ");
                 }
-                Log.d("MatchAdapter", "Гостевой гол: " + goalInfo);
+                Log.d(TAG, "Гостевой гол: " + goalInfo);
             }
             goalText.append(awayGoalsText.toString());
         }
         holder.goalScorers.setText(goalText.toString());
 
+        // Обработчики кнопок
         holder.btnLineups.setOnClickListener(v -> {
             if (onMatchActionListener != null) {
                 onMatchActionListener.onShowLineups(match);

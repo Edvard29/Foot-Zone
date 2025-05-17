@@ -1,11 +1,11 @@
 package com.example.footzone.network;
 
+import static android.content.ContentValues.TAG;
+
 import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.example.footzone.model.Footballer;
-import com.example.footzone.model.Match;
-import com.example.footzone.model.Transfer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,18 +16,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -88,6 +83,43 @@ public class ApiClient {
     public String getTeamLogoUrl(int teamId) {
         return teamLogoMap.getOrDefault(teamId, null);
     }
+    public static String getFixtureEvents(int fixtureId, ApiResponseCallback apiResponseCallback) {
+        String endpoint = "fixtures/events?fixture=" + fixtureId;
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(BASE_URL + endpoint);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("x-rapidapi-key", API_KEY);
+            connection.setRequestProperty("x-rapidapi-host", "api-football-v1.p.rapidapi.com");
+            connection.setConnectTimeout(5000); // 5 секунд таймаут
+            connection.setReadTimeout(5000);    // 5 секунд таймаут
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+                Log.d(TAG, "Успешный запрос к " + endpoint + ": " + response.toString().substring(0, Math.min(1000, response.length())));
+                return response.toString();
+            } else {
+                Log.e(TAG, "Ошибка запроса к " + endpoint + ": Код " + responseCode);
+                return null;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Исключение при запросе к " + endpoint + ": " + e.getMessage(), e);
+            return null;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
 
 
     public static void getMatches(int leagueId, ApiResponseCallback callback) {
@@ -318,6 +350,8 @@ public class ApiClient {
             JSONObject jsonObject = new JSONObject(jsonData);
             JSONArray responseArray = jsonObject.getJSONArray("response");
 
+            Log.d("ApiClient", "📜 Full JSON (Top Scorers): " + jsonData);
+
             for (int i = 0; i < responseArray.length(); i++) {
                 JSONObject playerObject = responseArray.getJSONObject(i);
                 JSONObject player = playerObject.getJSONObject("player");
@@ -327,18 +361,21 @@ public class ApiClient {
 
                 String name = player.getString("name");
                 String teamName = team.getString("name");
-                int goalCount = goals.optInt("total", 0);  // Количество голов
-                int assistCount = goals.optInt("assists", 0);  // Количество ассистов
+                String imageUrl = player.optString("photo", ""); // Get photo URL, default to empty string
+                int goalCount = goals.optInt("total", 0);
+                int assistCount = goals.optInt("assists", 0);
 
-                scorers.add(new Footballer(name, teamName, goalCount, assistCount));  // Добавляем футболиста
+                Log.d("ApiClient", "👤 Player: " + name + " | Team: " + teamName + " | Goals: " + goalCount + " | Assists: " + assistCount + " | Image: " + imageUrl);
+
+                scorers.add(new Footballer(name,  goalCount, assistCount, imageUrl));
             }
         } catch (JSONException e) {
+            Log.e("ApiClient", "❌ Error parsing top scorers: " + e.getMessage());
             e.printStackTrace();
         }
 
         return scorers;
     }
-
 
 
     public static List<Footballer> parseAssistants(String jsonData) {
@@ -348,7 +385,7 @@ public class ApiClient {
             JSONObject jsonObject = new JSONObject(jsonData);
             JSONArray responseArray = jsonObject.getJSONArray("response");
 
-            Log.d("ApiClient", "📜 Полный JSON: " + jsonData); // Логируем полный JSON
+            Log.d("ApiClient", "📜 Full JSON (Assist Leaders): " + jsonData);
 
             for (int i = 0; i < responseArray.length(); i++) {
                 JSONObject playerObject = responseArray.getJSONObject(i);
@@ -359,15 +396,16 @@ public class ApiClient {
 
                 String name = player.getString("name");
                 String teamName = team.getString("name");
-                int assistCount = goals.optInt("assists", 0);  // ✅ Теперь берем ассисты из goals
+                String imageUrl = player.optString("photo", ""); // Get photo URL, default to empty string
+                int assistCount = goals.optInt("assists", 0);
+                int goalCount = goals.optInt("total", 0);
 
-                Log.d("ApiClient", "👤 Игрок: " + name + " | Команда: " + teamName + " | Ассисты: " + assistCount);
+                Log.d("ApiClient", "👤 Player: " + name + " | Team: " + teamName + " | Goals: " + goalCount + " | Assists: " + assistCount + " | Image: " + imageUrl);
 
-                assistLeaders.add(new Footballer(name, teamName, 0, assistCount)); // 0 голов, ассисты есть
+                assistLeaders.add(new Footballer(name,  goalCount, assistCount, imageUrl));
             }
-
         } catch (JSONException e) {
-            Log.e("ApiClient", "❌ Ошибка парсинга ассистентов: " + e.getMessage());
+            Log.e("ApiClient", "❌ Error parsing assist leaders: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -388,6 +426,8 @@ public class ApiClient {
         Log.d("ApiClient", "📡 Requesting match result: " + apiUrl);
         executeRequest(apiUrl, callback);
     }
+
+
 
     /**
      * Выполнение HTTP-запроса

@@ -91,7 +91,7 @@ public class MainActivity extends BaseActivity {
     private boolean isDateOnOrAfterTarget(String matchDate) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date target = sdf.parse("2025-05-01"); // Фильтр с 9 апреля 2025 года
+            Date target = sdf.parse("2025-05-13"); // Фильтр с 9 апреля 2025 года
             Date match = sdf.parse(matchDate.substring(0, 10)); // Берем только дату
             return match.compareTo(target) >= 0;
         } catch (Exception e) {

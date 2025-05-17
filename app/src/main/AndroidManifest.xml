@@ -14,7 +14,7 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,9 +25,7 @@
         <activity
             android:name=".StandingsActivity"
             android:exported="true"/>
-        <activity
-            android:name=".TransfersActivity"
-            android:exported="true"/>
+
         <activity
             android:name=".SquadActivity"
             android:exported="true"/>
@@ -41,7 +39,7 @@
             android:name=".RegisterActivity"
             android:exported="true"/>
         <activity
-            android:name=".LoginActivity"
+            android:name=".MainActivity"
             android:exported="true"/>
         <activity
             android:name=".TopScorersActivity"
@@ -63,6 +61,9 @@
             android:exported="true"/>
         <activity
             android:name=".UserActivity"
+            android:exported="true"/>
+        <activity
+            android:name=".LeaderboardActivity"
             android:exported="true"/>
 
 

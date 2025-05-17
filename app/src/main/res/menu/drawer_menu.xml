@@ -1,16 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_home"
-        android:title="Главная"
-        android:icon="@drawable/ic_table"/>
+        android:title="Главная" />
     <item
         android:id="@+id/nav_user"
         android:title="Пользователь"
         android:icon="@drawable/ic_default_avatar"/>
     <item
-        android:id="@+id/nav_transfers"
-        android:title="Трансферы"
-        android:icon="@drawable/ic_transfer"/>
+        android:id="@+id/nav_leader"
+        android:title="Лидеры по очкам" />
+
     <item
         android:id="@+id/nav_standigs"
         android:title="Таблицы"

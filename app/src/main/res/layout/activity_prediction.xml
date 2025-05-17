@@ -17,16 +17,38 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/match_title"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Team A vs Team B"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/primary_text"
+                android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="16dp">
+
+                <ImageView
+                    android:id="@+id/home_team_logo"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="Home Team Logo"
+                    android:src="@drawable/ic_default_team_logo" />
+
+                <TextView
+                    android:id="@+id/match_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Team A vs Team B"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_text"
+                    android:gravity="center" />
+
+                <ImageView
+                    android:id="@+id/away_team_logo"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="Away Team Logo"
+                    android:src="@drawable/ic_default_team_logo" />
+            </LinearLayout>
 
             <!-- Предсказание счета -->
             <TextView
