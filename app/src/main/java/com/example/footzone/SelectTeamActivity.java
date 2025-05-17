@@ -1,65 +1,156 @@
 package com.example.footzone;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
+import android.util.Log;
 import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
+import androidx.core.app.NotificationCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.example.footzone.adapter.TeamSelectionAdapter;
+import com.example.footzone.model.Team;
+import com.google.firebase.messaging.FirebaseMessaging;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import androidx.appcompat.app.AppCompatActivity;
+public class SelectTeamActivity extends BaseActivity {
 
-import java.util.HashMap;
-import java.util.Map;
+    private static final String TAG = "SelectTeamActivity";
+    private static final String PREFS_NAME = "FavoriteTeams";
+    private static final String CHANNEL_ID = "team_notifications";
 
-public class SelectTeamActivity extends AppCompatActivity {
-
-    private Spinner teamSpinner;
-    private Button selectButton;
-    private TextView teamInfo;
-
-    private String[] teams = {
-            "Барселона", "Реал Мадрид", "Атлетико Мадрид", "Манчестер Сити", "Манчестер Юнайтед",
-            "Арсенал", "Ливерпуль", "Челси", "Бавария", "Интер", "Ювентус", "Рома", "ПСЖ"
-    };
-
-    private Map<String, String> teamInfoMap;
+    private RecyclerView teamRecyclerView;
+    private Button saveButton;
+    private TextView selectTeamTitle;
+    private TeamSelectionAdapter adapter;
+    private List<Team> teams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_select_team);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Favorite Teams");
+        }
 
-        teamSpinner = findViewById(R.id.team_spinner);
-        selectButton = findViewById(R.id.select_button);
-        teamInfo = findViewById(R.id.team_info);
+        // Initialize views
+        teamRecyclerView = findViewById(R.id.team_recycler_view);
+        saveButton = findViewById(R.id.save_button);
+        selectTeamTitle = findViewById(R.id.select_team_title);
 
-        // Настройка Spinner с командами
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, teams);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        teamSpinner.setAdapter(adapter);
+        // Initialize team data
+        teams = new ArrayList<>();
+        teams.add(new Team("Барселона", "https://via.placeholder.com/150/0288D1/FFFFFF?text=Barcelona"));
+        teams.add(new Team("Реал Мадрид", "https://via.placeholder.com/150/0288D1/FFFFFF?text=RealMadrid"));
+        teams.add(new Team("Атлетико Мадрид", "https://via.placeholder.com/150/0288D1/FFFFFF?text=Atletico"));
+        teams.add(new Team("Манчестер Сити", "https://via.placeholder.com/150/0288D1/FFFFFF?text=ManCity"));
+        teams.add(new Team("Манчестер Юнайтед", "https://via.placeholder.com/150/0288D1/FFFFFF?text=ManUtd"));
+        teams.add(new Team("Арсенал", "https://via.placeholder.com/150/0288D1/FFFFFF?text=Arsenal"));
+        teams.add(new Team("Ливерпуль", "https://via.placeholder.com/150/0288D1/FFFFFF?text=Liverpool"));
+        teams.add(new Team("Челси", "https://via.placeholder.com/150/0288D1/FFFFFF?text=Chelsea"));
+        teams.add(new Team("Бавария", "https://via.placeholder.com/150/0288D1/FFFFFF?text=Bayern"));
+        teams.add(new Team("Интер", "https://via.placeholder.com/150/0288D1/FFFFFF?text=Inter"));
+        teams.add(new Team("Ювентус", "https://via.placeholder.com/150/0288D1/FFFFFF?text=Juventus"));
+        teams.add(new Team("Рома", "https://via.placeholder.com/150/0288D1/FFFFFF?text=Roma"));
+        teams.add(new Team("ПСЖ", "https://via.placeholder.com/150/0288D1/FFFFFF?text=PSG"));
 
-        // Информация о командах
-        teamInfoMap = new HashMap<>();
-        teamInfoMap.put("Барселона", "Барселона - основана в 1899 году. Клуб выиграл 5 Лиг чемпионов, 26 титулов чемпионов Испании и 31 Кубок Короля. Знаменитые игроки: Лионель Месси, Хави, Андрес Иньеста.");
-        teamInfoMap.put("Реал Мадрид", "Реал Мадрид - основан в 1902 году. Клуб выигрывал 14 Лиг чемпионов, 35 титулов чемпионов Испании и 19 Кубков Короля. Знаменитые игроки: Криштиану Роналду, Альфредо Ди Стефано, Зинедин Зидан.");
-        teamInfoMap.put("Атлетико Мадрид", "Атлетико Мадрид - основан в 1903 году. Клуб выигрывал 11 титулов чемпионов Испании, 10 Кубков Короля и 3 Лиги Европы. Знаменитые игроки: Диего Форлан, Антуан Гризманн.");
-        teamInfoMap.put("Манчестер Сити", "Манчестер Сити - основан в 1880 году. Клуб выиграл 9 титулов чемпионов Англии, 6 Кубков Англии и 1 Лигу чемпионов. Знаменитые игроки: Серхио Агуэро, Кевин Де Брюйне.");
-        teamInfoMap.put("Манчестер Юнайтед", "Манчестер Юнайтед - основан в 1878 году. Клуб выиграл 20 титулов чемпионов Англии, 12 Кубков Англии и 3 Лиги чемпионов. Знаменитые игроки: Эрик Кантона, Райан Гиггз, Руни.");
-        teamInfoMap.put("Арсенал", "Арсенал - основан в 1886 году. Клуб выигрывал 13 титулов чемпионов Англии, 14 Кубков Англии. Знаменитые игроки: Тьерри Анри, Деннис Беркамп.");
-        teamInfoMap.put("Ливерпуль", "Ливерпуль - основан в 1892 году. Клуб выиграл 6 Лиг чемпионов, 19 титулов чемпионов Англии, 8 Кубков Англии. Знаменитые игроки: Стивен Джеррард, Кенни Далглиш.");
-        teamInfoMap.put("Челси", "Челси - основан в 1905 году. Клуб выиграл 6 титулов чемпионов Англии, 2 Лиги чемпионов и 8 Кубков Англии. Знаменитые игроки: Фрэнк Лэмпард, Джон Терри.");
-        teamInfoMap.put("Бавария", "Бавария - основана в 1900 году. Клуб выиграл 6 Лиг чемпионов, 32 титула чемпионов Германии и 20 Кубков Германии. Знаменитые игроки: Франц Беккенбауэр, Герд Мюллер.");
-        teamInfoMap.put("Интер", "Интер - основан в 1908 году. Клуб выиграл 3 Лиги чемпионов, 19 титулов чемпионов Италии и 7 Кубков Италии. Знаменитые игроки: Джузеппе Меацца, Роналдо.");
-        teamInfoMap.put("Ювентус", "Ювентус - основан в 1897 году. Клуб выиграл 2 Лиги чемпионов, 36 титулов чемпионов Италии и 14 Кубков Италии. Знаменитые игроки: Алессандро Дель Пьеро, Джанлуиджи Буффон.");
-        teamInfoMap.put("Рома", "Рома - основана в 1927 году. Клуб выигрывал 3 титула чемпионов Италии, 9 Кубков Италии и 1 Кубок чемпионов. Знаменитые игроки: Франческо Тотти, Даниэле Де Росси.");
-        teamInfoMap.put("ПСЖ", "ПСЖ - основан в 1970 году. Клуб выиграл 1 Лигу чемпионов, 9 титулов чемпионов Франции и 14 Кубков Франции. Знаменитые игроки: Неймар, Килиан Мбаппе.");
+        // Load previously selected teams
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Set<String> favoriteTeams = prefs.getStringSet("favorites", new HashSet<>());
+        for (Team team : teams) {
+            team.setSelected(favoriteTeams.contains(team.getName()));
+        }
 
+        // Set up RecyclerView
+        teamRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new TeamSelectionAdapter(teams);
+        teamRecyclerView.setAdapter(adapter);
 
-        // Обработка выбора команды
-        selectButton.setOnClickListener(v -> {
-            String selectedTeam = teamSpinner.getSelectedItem().toString();
-            String info = teamInfoMap.get(selectedTeam);
-            teamInfo.setText(info);
+        // Save button
+        saveButton.setOnClickListener(v -> {
+            List<String> selectedTeams = new ArrayList<>();
+            for (Team team : teams) {
+                if (team.isSelected()) {
+                    selectedTeams.add(team.getName());
+                    subscribeToTeamNotifications(team.getName());
+                } else {
+                    unsubscribeFromTeamNotifications(team.getName());
+                }
+            }
+
+            // Save to SharedPreferences
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putStringSet("favorites", new HashSet<>(selectedTeams));
+            editor.apply();
+
+            Log.d(TAG, "Selected teams saved: " + selectedTeams);
+
+            // Send test notification for first selected team
+            if (!selectedTeams.isEmpty()) {
+                sendTestNotification(selectedTeams.get(0), "Match starting soon!");
+            }
         });
+
+        // Set up notification channel
+        createNotificationChannel();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Team Notifications",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            channel.setDescription("Notifications for favorite team events");
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+    }
+
+    private void subscribeToTeamNotifications(String teamName) {
+        FirebaseMessaging.getInstance().subscribeToTopic(teamName.replace(" ", "_"))
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Subscribed to " + teamName);
+                    } else {
+                        Log.w(TAG, "Failed to subscribe to " + teamName, task.getException());
+                    }
+                });
+    }
+
+    private void unsubscribeFromTeamNotifications(String teamName) {
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(teamName.replace(" ", "_"))
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Unsubscribed from " + teamName);
+                    } else {
+                        Log.w(TAG, "Failed to unsubscribe from " + teamName, task.getException());
+                    }
+                });
+    }
+
+    private void sendTestNotification(String teamName, String message) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_default_team_logo)
+                .setContentTitle(teamName + " Update")
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify((int) System.currentTimeMillis(), builder.build());
+        Log.d(TAG, "Sent test notification for " + teamName + ": " + message);
+    }
+
+    @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_select_team;
     }
 }
