@@ -15,25 +15,30 @@
  */
 package com.example.footzone;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.GravityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.footzone.adapter.FootballerAdapter;
 import com.example.footzone.model.Footballer;
 import com.example.footzone.network.ApiClient;
 import com.example.footzone.network.ApiResponseCallback;
+import com.google.android.material.navigation.NavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TopScorersActivity extends BaseActivity {
+public class TopScorersActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView recyclerView;
     private FootballerAdapter adapter;
@@ -43,16 +48,26 @@ public class TopScorersActivity extends BaseActivity {
     private static final int[] LEAGUE_IDS = {39, 140, 135, 78, 61}; // League IDs (e.g., Premier League, La Liga)
 
     @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_top_scorers;
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_top_scorers);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Top Scorers");
-        }
 
+        // Initialize views
         recyclerView = findViewById(R.id.recycler_view_top_scorers);
         progressBar = findViewById(R.id.progress_bar);
         leagueSpinner = findViewById(R.id.league_spinner);
+
+        // Set up NavigationView
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this);
+        } else {
+            Log.e("TopScorersActivity", "NavigationView not found in layout");
+        }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -75,11 +90,6 @@ public class TopScorersActivity extends BaseActivity {
 
         // Initial load for first league
         fetchTopScorers(LEAGUE_IDS[0]);
-    }
-
-    @Override
-    protected int getLayoutResourceId() {
-        return R.layout.activity_top_scorers;
     }
 
     private void fetchTopScorers(int leagueId) {
@@ -117,5 +127,25 @@ public class TopScorersActivity extends BaseActivity {
                 });
             }
         });
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            finish();
+        }
+        return true;
     }
 }

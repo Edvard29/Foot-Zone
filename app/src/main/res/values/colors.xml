@@ -15,6 +15,11 @@
         <color name="primary_text_bright">#FF01579B</color> <!-- Dark Blue for primary text -->
         <color name="secondary_text_bright">#FF0288D1</color> <!-- Cyan for secondary text -->
         <color name="accent_bright">#FFFF4081</color> <!-- Bright Pink for accents -->
+        <color name="background_bright">#FFFFFF</color>
+        <color name="card_accent">#81C784</color> <!-- Medium green for card accents -->
+
+        <color name="accent_text">#388E3C</color> <!-- Bright green for highlighted text -->
+
 
 
         <!-- Цвет фона карточки -->

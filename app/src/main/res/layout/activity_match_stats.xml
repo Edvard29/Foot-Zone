@@ -13,7 +13,6 @@
         android:padding="16dp">
 
 
-
         <!-- Контейнер для названия команд и даты -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"

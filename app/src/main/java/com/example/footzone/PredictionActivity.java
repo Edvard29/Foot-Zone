@@ -2,10 +2,12 @@ package com.example.footzone;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.core.view.GravityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
@@ -22,6 +26,7 @@ import com.example.footzone.model.Prediction;
 import com.example.footzone.network.ApiClient;
 import com.example.footzone.network.ApiResponseCallback;
 import com.example.footzone.EmailSender;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class PredictionActivity extends BaseActivity {
+public class PredictionActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private TextView matchTitle;
     private EditText homeGoals, awayGoals;
@@ -54,13 +59,15 @@ public class PredictionActivity extends BaseActivity {
     private int homeTeamId, awayTeamId;
 
     @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_prediction;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Make Prediction");
-        }
 
-        // Инициализация UI элементов
+        // Initialize UI elements
         matchTitle = findViewById(R.id.match_title);
         homeGoals = findViewById(R.id.home_goals);
         awayGoals = findViewById(R.id.away_goals);
@@ -71,16 +78,33 @@ public class PredictionActivity extends BaseActivity {
         homeTeamLogo = findViewById(R.id.home_team_logo);
         awayTeamLogo = findViewById(R.id.away_team_logo);
 
-        // Получение данных из Intent
+        // Set up NavigationView
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this);
+        } else {
+            Log.e("PredictionActivity", "NavigationView not found in layout");
+        }
+
+        // Get data from Intent
         fixtureId = getIntent().getIntExtra("fixtureId", -1);
         matchTitleText = getIntent().getStringExtra("matchTitle");
         matchDate = getIntent().getStringExtra("matchDate");
         matchStatus = getIntent().getStringExtra("matchStatus");
         homeTeamId = getIntent().getIntExtra("homeTeamId", -1);
         awayTeamId = getIntent().getIntExtra("awayTeamId", -1);
-        matchTitle.setText(matchTitleText);
 
-        // Инициализация SharedPreferences и Firebase
+        // Validate fixtureId
+        if (fixtureId == -1) {
+            Log.e("PredictionActivity", "Invalid fixtureId received in Intent");
+            Toast.makeText(this, "Invalid match data. Please try again.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
+        matchTitle.setText(matchTitleText != null ? matchTitleText : "Match");
+
+        // Initialize SharedPreferences and Firebase
         prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         predictionsRef = FirebaseDatabase.getInstance().getReference("predictions").child(String.valueOf(fixtureId));
         usersRef = FirebaseDatabase.getInstance().getReference("users");
@@ -91,11 +115,6 @@ public class PredictionActivity extends BaseActivity {
         } else {
             loadUserEmailAndInitialize();
         }
-    }
-
-    @Override
-    protected int getLayoutResourceId() {
-        return R.layout.activity_prediction;
     }
 
     private void showUsernameDialog() {
@@ -229,8 +248,8 @@ public class PredictionActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Long predictionCount = dataSnapshot.getValue(Long.class);
                 int count = predictionCount != null ? predictionCount.intValue() : 0;
-                if (count >= 10) {
-                    matchTitle.setText("You have reached the prediction limit of 5 matches!");
+                if (count >= 15) {
+                    matchTitle.setText("You have reached the prediction limit of 15 matches!");
                     homeGoals.setVisibility(View.GONE);
                     awayGoals.setVisibility(View.GONE);
                     homeLineupRecyclerView.setVisibility(View.GONE);
@@ -600,5 +619,26 @@ public class PredictionActivity extends BaseActivity {
         message.append("Thank you for playing!\nFootZone Team");
 
         EmailSender.sendPredictionResult(userEmail, subject, message.toString());
+    }
+
+
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            finish();
+        }
+        return true;
     }
 }

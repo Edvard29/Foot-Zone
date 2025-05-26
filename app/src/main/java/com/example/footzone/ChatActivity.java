@@ -2,14 +2,17 @@ package com.example.footzone;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.footzone.adapter.ChatAdapter;
 import com.example.footzone.model.Message;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -18,7 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatActivity extends BaseActivity {
+public class ChatActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView chatRecyclerView;
     private EditText messageInput;
@@ -29,35 +32,46 @@ public class ChatActivity extends BaseActivity {
     private String username;
 
     @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_chat;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
-        int fixtureId = getIntent().getIntExtra("fixtureId", -1);
-        String matchTitle = getIntent().getStringExtra("matchTitle");
-        getSupportActionBar().setTitle("Chat: " + matchTitle);
-
+        // Initialize views
         chatRecyclerView = findViewById(R.id.chat_recycler_view);
         messageInput = findViewById(R.id.message_input);
         sendButton = findViewById(R.id.send_button);
 
+        // Set up NavigationView
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this);
+        }
+
+        // Set toolbar title
+        int fixtureId = getIntent().getIntExtra("fixtureId", -1);
+        String matchTitle = getIntent().getStringExtra("matchTitle");
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Chat: " + matchTitle);
+        }
+
+        // Set up RecyclerView
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         chatAdapter = new ChatAdapter(messageList);
         chatRecyclerView.setAdapter(chatAdapter);
 
-        // Получаем имя пользователя из SharedPreferences
+        // Get username from SharedPreferences
         SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        username = prefs.getString("username", "Anonymous"); // "Anonymous" на случай ошибки
+        username = prefs.getString("username", "Anonymous");
 
+        // Initialize Firebase reference
         chatRef = FirebaseDatabase.getInstance().getReference("chats").child(String.valueOf(fixtureId));
         listenForMessages();
 
+        // Set send button listener
         sendButton.setOnClickListener(v -> sendMessage());
     }
 
@@ -87,14 +101,29 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                // Обработка ошибок
+                // Handle errors
             }
         });
     }
 
+
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            finish();
+        }
         return true;
     }
 }

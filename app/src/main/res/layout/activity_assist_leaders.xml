@@ -1,43 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <!-- Заголовок экрана -->
-    <TextView
-        android:id="@+id/title_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ассистенты"
-        android:textSize="20sp"
-        android:textColor="@color/button_color"
-        android:layout_gravity="center"
-        android:padding="8dp"
-        android:textStyle="bold" />
-
-    <!-- Spinner для выбора лиги -->
-    <Spinner
-        android:id="@+id/league_spinner"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <!-- Прогресс-бар -->
-    <ProgressBar
-        android:id="@+id/progress_bar"
+
+        <!-- Заголовок экрана -->
+        <TextView
+            android:id="@+id/title_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ассистенты"
+            android:textSize="20sp"
+            android:textColor="@color/button_color"
+            android:layout_gravity="center"
+            android:padding="8dp"
+            android:textStyle="bold" />
+
+        <!-- Spinner для выбора лиги -->
+        <Spinner
+            android:id="@+id/league_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
+
+        <!-- Прогресс-бар -->
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <!-- RecyclerView для списка ассистентов -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_assistants"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/drawer_menu"/>
 
-    <!-- RecyclerView для списка ассистентов -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_assistants"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-</LinearLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

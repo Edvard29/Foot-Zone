@@ -1,5 +1,6 @@
 package com.example.footzone.adapter;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,7 @@ public class TeamSelectionAdapter extends RecyclerView.Adapter<TeamSelectionAdap
         return new TeamViewHolder(view);
     }
 
+    @SuppressLint("CheckResult")
     @Override
     public void onBindViewHolder(@NonNull TeamViewHolder holder, int position) {
         Team team = teams.get(position);
@@ -40,8 +42,7 @@ public class TeamSelectionAdapter extends RecyclerView.Adapter<TeamSelectionAdap
                 .load(team.getLogoUrl())
                 .placeholder(R.drawable.ic_default_team_logo)
                 .error(R.drawable.ic_default_team_logo)
-                .circleCrop()
-                .into(holder.teamLogo);
+                .circleCrop();
 
         holder.checkBox.setChecked(team.isSelected());
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -60,13 +61,11 @@ public class TeamSelectionAdapter extends RecyclerView.Adapter<TeamSelectionAdap
     }
 
     static class TeamViewHolder extends RecyclerView.ViewHolder {
-        ImageView teamLogo;
         TextView teamName;
         CheckBox checkBox;
 
         TeamViewHolder(@NonNull View itemView) {
             super(itemView);
-            teamLogo = itemView.findViewById(R.id.team_logo);
             teamName = itemView.findViewById(R.id.team_name);
             checkBox = itemView.findViewById(R.id.team_checkbox);
         }

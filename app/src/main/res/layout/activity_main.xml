@@ -13,7 +13,7 @@
         android:background="@color/background">
 
         <!-- Toolbar (верхняя панель) -->
-\
+        \
 
         <!-- Основной контент: список матчей -->
         <androidx.recyclerview.widget.RecyclerView

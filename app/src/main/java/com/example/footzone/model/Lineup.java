@@ -10,7 +10,7 @@ public class Lineup {
 
     public Lineup(String teamName, String teamLogo, String formation, List<Player> players) {
         this.teamName = teamName;
-        this.teamLogo = teamLogo;
+
         this.formation = formation;
         this.players = players;
     }

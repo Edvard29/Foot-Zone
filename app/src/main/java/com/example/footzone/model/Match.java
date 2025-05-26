@@ -15,16 +15,20 @@ public class Match {
     private int awayTeamId;
     private String homeTeamLogoUrl;
     private String awayTeamLogoUrl;
-    private List<Goal> homeGoals; // Список голов домашней команды
-    private List<Goal> awayGoals; // Список голов гостевой команды
+    private List<Goal> homeGoals;
+    private List<Goal> awayGoals;
 
     public static class Goal {
         private final String playerName;
         private final int minute;
+        private final boolean isOwnGoal;
+        private final String goalType; // Новое поле для типа гола
 
-        public Goal(String playerName, int minute) {
+        public Goal(String playerName, int minute, boolean isOwnGoal, String goalType) {
             this.playerName = playerName;
             this.minute = minute;
+            this.isOwnGoal = isOwnGoal;
+            this.goalType = goalType;
         }
 
         public String getPlayerName() {
@@ -33,6 +37,14 @@ public class Match {
 
         public int getMinute() {
             return minute;
+        }
+
+        public boolean isOwnGoal() {
+            return isOwnGoal;
+        }
+
+        public String getGoalType() {
+            return goalType;
         }
     }
 

@@ -29,6 +29,7 @@ public class MainActivity extends BaseActivity {
     private MatchAdapter matchAdapter;
     private List<Integer> topLeagues;
     private final List<Match> allMatches = new ArrayList<>();
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
     @Override
     protected int getLayoutResourceId() {
@@ -43,7 +44,19 @@ public class MainActivity extends BaseActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setNestedScrollingEnabled(true);
 
-        topLeagues = Arrays.asList(39, 61, 78, 140, 135);
+        // Updated list with Eurocup and international competition IDs
+        topLeagues = Arrays.asList(
+                39,  // Premier League
+                61,  // Ligue 1
+                78,  // Bundesliga
+                140, // La Liga
+                135, // Serie A
+                2,   // UEFA Champions League
+                3,   // UEFA Europa League
+                848, // UEFA Conference League
+                1,   // FIFA World Cup
+                5    // UEFA Nations League
+        );
 
         fetchMatches();
     }
@@ -56,47 +69,34 @@ public class MainActivity extends BaseActivity {
             ApiClient.getMatches(leagueId, new ApiResponseCallback() {
                 @Override
                 public void onSuccess(String jsonData) {
-                    Log.d("MainActivity", "Received data for league " + leagueId + ": " + jsonData.substring(0, Math.min(jsonData.length(), 100)));
+                    Log.d("MainActivity", "Received data for league/competition " + leagueId + ": " + jsonData.substring(0, Math.min(jsonData.length(), 100)));
                     List<Match> matches = FootballApi.parseMatches(jsonData);
                     if (matches == null || matches.isEmpty()) {
-                        Log.e("MainActivity", "No matches parsed for league " + leagueId);
+                        Log.e("MainActivity", "No matches parsed for league/competition " + leagueId);
                         handleRequestCompletion(completedRequests);
                         return;
                     }
 
-                    List<Match> filteredMatches = new ArrayList<>();
+                    // Debug: Check goal data
                     for (Match match : matches) {
-                        if (isDateOnOrAfterTarget(match.getDate())) {
-                            filteredMatches.add(match);
-                            Log.d("MainActivity", "Match added: " + match.getHomeTeam() + " vs " + match.getAwayTeam() + ", Date: " + match.getDate());
-                        }
+                        Log.d("MainActivity", "Match ID " + match.getFixtureId() + ": Status=" + match.getStatus() +
+                                ", HomeGoals=" + (match.getHomeGoalDetails() != null ? match.getHomeGoalDetails().size() : "null") +
+                                ", AwayGoals=" + (match.getAwayGoalDetails() != null ? match.getAwayGoalDetails().size() : "null"));
                     }
-                    Log.d("MainActivity", "Filtered " + filteredMatches.size() + " matches for league " + leagueId);
 
                     synchronized (allMatches) {
-                        allMatches.addAll(filteredMatches);
+                        allMatches.addAll(matches);
                     }
+                    Log.d("MainActivity", "Added " + matches.size() + " matches for league/competition " + leagueId);
                     handleRequestCompletion(completedRequests);
                 }
 
                 @Override
                 public void onFailure(String errorMessage) {
-                    Log.e("MainActivity", "Error fetching data for league " + leagueId + ": " + errorMessage);
+                    Log.e("MainActivity", "Error fetching data for league/competition " + leagueId + ": " + errorMessage);
                     handleRequestCompletion(completedRequests);
                 }
             });
-        }
-    }
-
-    private boolean isDateOnOrAfterTarget(String matchDate) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date target = sdf.parse("2025-05-13"); // Фильтр с 9 апреля 2025 года
-            Date match = sdf.parse(matchDate.substring(0, 10)); // Берем только дату
-            return match.compareTo(target) >= 0;
-        } catch (Exception e) {
-            Log.e("MainActivity", "Date parse error for " + matchDate + ": " + e.getMessage());
-            return false;
         }
     }
 
@@ -144,11 +144,71 @@ public class MainActivity extends BaseActivity {
                     }
                 });
                 recyclerView.setAdapter(matchAdapter);
+                scrollToCurrentMatches();
                 if (allMatches.isEmpty()) {
                     Toast.makeText(MainActivity.this, "Нет доступных матчей", Toast.LENGTH_SHORT).show();
                 }
             });
         }
+    }
+
+    private void sortMatchesByDate() {
+        Collections.sort(allMatches, new Comparator<Match>() {
+            @Override
+            public int compare(Match match1, Match match2) {
+                try {
+                    Date date1 = sdf.parse(match1.getDate());
+                    Date date2 = sdf.parse(match2.getDate());
+                    return date1.compareTo(date2);
+                } catch (Exception e) {
+                    Log.e("MainActivity", "Ошибка сортировки: " + e.getMessage());
+                    return 0;
+                }
+            }
+        });
+    }
+
+    private void scrollToCurrentMatches() {
+        long currentTime = System.currentTimeMillis();
+        int currentMatchPosition = -1;
+
+        for (int i = 0; i < allMatches.size(); i++) {
+            Match match = allMatches.get(i);
+            try {
+                Date matchDate = sdf.parse(match.getDate());
+                long matchTime = matchDate.getTime();
+                String status = match.getStatus() != null ? match.getStatus().toLowerCase() : "";
+                if (status.contains("live") || status.contains("in_play") ||
+                        (currentTime >= matchTime && currentTime <= matchTime + 120 * 60 * 1000)) {
+                    currentMatchPosition = i;
+                    break;
+                }
+            } catch (Exception e) {
+                Log.e("MainActivity", "Ошибка парсинга даты матча: " + e.getMessage());
+            }
+        }
+
+        if (currentMatchPosition != -1) {
+            recyclerView.scrollToPosition(currentMatchPosition);
+            Log.d("MainActivity", "Scrolled to current match at position: " + currentMatchPosition);
+            return;
+        }
+
+        for (int i = 0; i < allMatches.size(); i++) {
+            Match match = allMatches.get(i);
+            try {
+                Date matchDate = sdf.parse(match.getDate());
+                if (matchDate.getTime() > currentTime) {
+                    recyclerView.scrollToPosition(i);
+                    Log.d("MainActivity", "Scrolled to first future match at position: " + i);
+                    return;
+                }
+            } catch (Exception e) {
+                Log.e("MainActivity", "Ошибка парсинга даты при прокрутке: " + e.getMessage());
+            }
+        }
+
+        Log.d("MainActivity", "No current or future matches, staying at start");
     }
 
     private void fetchLineupsForMatch(Match match) {
@@ -254,22 +314,5 @@ public class MainActivity extends BaseActivity {
             lineup.append(player.getString("name")).append("\n");
         }
         return lineup.toString();
-    }
-
-    private void sortMatchesByDate() {
-        Collections.sort(allMatches, new Comparator<Match>() {
-            @Override
-            public int compare(Match match1, Match match2) {
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-                    Date date1 = sdf.parse(match1.getDate());
-                    Date date2 = sdf.parse(match2.getDate());
-                    return date1.compareTo(date2);
-                } catch (Exception e) {
-                    Log.e("MainActivity", "Ошибка сортировки: " + e.getMessage());
-                    return 0;
-                }
-            }
-        });
     }
 }

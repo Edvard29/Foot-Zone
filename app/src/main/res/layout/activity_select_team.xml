@@ -33,7 +33,7 @@
         android:text="Сохранить выбор"
         android:textSize="18sp"
         android:textColor="@color/white"
-        android:backgroundTint="@color/accent_bright"
+        android:backgroundTint="@color/button_background"
         android:padding="12dp"
         android:layout_marginTop="16dp" />
 
