@@ -3,24 +3,21 @@ package com.example.footzone;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
+
 import androidx.core.view.GravityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+
 import com.example.footzone.adapter.LineupPlayerAdapter;
 import com.example.footzone.model.Player;
 import com.example.footzone.network.ApiClient;
 import com.example.footzone.network.ApiResponseCallback;
+
 import com.google.android.material.navigation.NavigationView;
 import org.json.JSONArray;
 import org.json.JSONObject;

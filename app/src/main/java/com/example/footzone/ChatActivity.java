@@ -2,12 +2,12 @@ package com.example.footzone;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.MenuItem;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
+
 import androidx.core.view.GravityCompat;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.footzone.adapter.ChatAdapter;
@@ -85,23 +85,36 @@ public class ChatActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void listenForMessages() {
-        chatRef.addValueEventListener(new ValueEventListener() {
-            @Override
+        this.chatRef.addValueEventListener(new ValueEventListener() {
             public void onDataChange(DataSnapshot dataSnapshot) {
-                messageList.clear();
+                List<Message> newMessages = new ArrayList<>();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Message message = snapshot.getValue(Message.class);
                     if (message != null) {
-                        messageList.add(message);
+                        newMessages.add(message);
                     }
                 }
-                chatAdapter.notifyDataSetChanged();
+                DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                    @Override
+                    public int getOldListSize() { return messageList.size(); }
+                    @Override
+                    public int getNewListSize() { return newMessages.size(); }
+                    @Override
+                    public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                        return messageList.get(oldItemPosition).getTimestamp() == newMessages.get(newItemPosition).getTimestamp();
+                    }
+                    @Override
+                    public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                        return messageList.get(oldItemPosition).equals(newMessages.get(newItemPosition));
+                    }
+                });
+                messageList.clear();
+                messageList.addAll(newMessages);
+                diffResult.dispatchUpdatesTo(chatAdapter);
                 chatRecyclerView.scrollToPosition(messageList.size() - 1);
             }
-
-            @Override
             public void onCancelled(DatabaseError databaseError) {
-                // Handle errors
+                Log.e("ChatActivity", "Database error: " + databaseError.getMessage());
             }
         });
     }

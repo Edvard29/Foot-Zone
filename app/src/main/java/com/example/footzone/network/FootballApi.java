@@ -113,7 +113,7 @@ public class FootballApi {
                         homeTeamId,
                         awayTeamId,
                         homeTeamLogo,
-                        homeTeamLogo,
+                        awayTeamLogo,
                         homeGoals,
                         awayGoals
                 );

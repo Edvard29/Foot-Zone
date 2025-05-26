@@ -7,6 +7,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
+
+
 public class UsernameActivity extends AppCompatActivity {
 
     private EditText usernameInput;

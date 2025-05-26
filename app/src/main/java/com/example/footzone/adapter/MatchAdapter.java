@@ -44,6 +44,9 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> 
         Match match = matchList.get(position);
         String TAG = "MatchAdapter";
 
+        Log.d(TAG, "Home Team Logo URL: " + match.getHomeTeamLogoUrl());
+        Log.d(TAG, "Away Team Logo URL: " + match.getAwayTeamLogoUrl());
+
         // Установка даты матча
         holder.matchDate.setText(match.getDate().substring(0, 10));
         holder.matchDate.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.date_text_color));
@@ -73,7 +76,6 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> 
                 .placeholder(R.drawable.ic_default_team_logo)
                 .error(R.drawable.ic_default_team_logo)
                 .into(holder.awayTeamLogo);
-
 
 
         // Обработчики кнопок
@@ -108,7 +110,7 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView matchDate, matchInfo, goalScorers;
+        TextView matchDate, matchInfo;
         ImageView homeTeamLogo, awayTeamLogo;
         Button btnLineups, btnStats, btnChat, btnPredict;
 
@@ -116,8 +118,8 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> 
             super(itemView);
             matchDate = itemView.findViewById(R.id.match_date);
             matchInfo = itemView.findViewById(R.id.match_info);
-            homeTeamLogo = itemView.findViewById(R.id.home_team_logo);
-            awayTeamLogo = itemView.findViewById(R.id.away_team_logo);
+            homeTeamLogo = itemView.findViewById(R.id.home_team_logo); // ID должен совпадать с XML
+            awayTeamLogo = itemView.findViewById(R.id.away_team_logo); // ID должен совпадать с XML
             btnLineups = itemView.findViewById(R.id.btn_lineups);
             btnStats = itemView.findViewById(R.id.btn_stats);
             btnChat = itemView.findViewById(R.id.btn_chat);

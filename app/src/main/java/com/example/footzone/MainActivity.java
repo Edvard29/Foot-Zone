@@ -12,6 +12,8 @@ import com.example.footzone.model.Match;
 import com.example.footzone.network.ApiClient;
 import com.example.footzone.network.ApiResponseCallback;
 import com.example.footzone.network.FootballApi;
+
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.text.SimpleDateFormat;
@@ -44,7 +46,6 @@ public class MainActivity extends BaseActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setNestedScrollingEnabled(true);
 
-        // Updated list with Eurocup and international competition IDs
         topLeagues = Arrays.asList(
                 39,  // Premier League
                 61,  // Ligue 1
@@ -69,31 +70,24 @@ public class MainActivity extends BaseActivity {
             ApiClient.getMatches(leagueId, new ApiResponseCallback() {
                 @Override
                 public void onSuccess(String jsonData) {
-                    Log.d("MainActivity", "Received data for league/competition " + leagueId + ": " + jsonData.substring(0, Math.min(jsonData.length(), 100)));
+                    Log.d("MainActivity", "Received data for league " + leagueId + ": " + jsonData.substring(0, Math.min(jsonData.length(), 100)));
                     List<Match> matches = FootballApi.parseMatches(jsonData);
                     if (matches == null || matches.isEmpty()) {
-                        Log.e("MainActivity", "No matches parsed for league/competition " + leagueId);
+                        Log.e("MainActivity", "No matches parsed for league " + leagueId);
                         handleRequestCompletion(completedRequests);
                         return;
                     }
 
-                    // Debug: Check goal data
-                    for (Match match : matches) {
-                        Log.d("MainActivity", "Match ID " + match.getFixtureId() + ": Status=" + match.getStatus() +
-                                ", HomeGoals=" + (match.getHomeGoalDetails() != null ? match.getHomeGoalDetails().size() : "null") +
-                                ", AwayGoals=" + (match.getAwayGoalDetails() != null ? match.getAwayGoalDetails().size() : "null"));
-                    }
-
                     synchronized (allMatches) {
-                        allMatches.addAll(matches);
+                        allMatches.addAll(matches); // Добавляем все матчи
                     }
-                    Log.d("MainActivity", "Added " + matches.size() + " matches for league/competition " + leagueId);
+                    Log.d("MainActivity", "Added " + matches.size() + " matches for league " + leagueId);
                     handleRequestCompletion(completedRequests);
                 }
 
                 @Override
                 public void onFailure(String errorMessage) {
-                    Log.e("MainActivity", "Error fetching data for league/competition " + leagueId + ": " + errorMessage);
+                    Log.e("MainActivity", "Error fetching data for league " + leagueId + ": " + errorMessage);
                     handleRequestCompletion(completedRequests);
                 }
             });
@@ -144,7 +138,7 @@ public class MainActivity extends BaseActivity {
                     }
                 });
                 recyclerView.setAdapter(matchAdapter);
-                scrollToCurrentMatches();
+                scrollToCurrentMatches(); // Прокручиваем к текущим матчам
                 if (allMatches.isEmpty()) {
                     Toast.makeText(MainActivity.this, "Нет доступных матчей", Toast.LENGTH_SHORT).show();
                 }
@@ -159,7 +153,7 @@ public class MainActivity extends BaseActivity {
                 try {
                     Date date1 = sdf.parse(match1.getDate());
                     Date date2 = sdf.parse(match2.getDate());
-                    return date1.compareTo(date2);
+                    return date1.compareTo(date2); // Сортировка по возрастанию дат
                 } catch (Exception e) {
                     Log.e("MainActivity", "Ошибка сортировки: " + e.getMessage());
                     return 0;
@@ -172,11 +166,14 @@ public class MainActivity extends BaseActivity {
         long currentTime = System.currentTimeMillis();
         int currentMatchPosition = -1;
 
+        // Находим позицию первого текущего матча
         for (int i = 0; i < allMatches.size(); i++) {
             Match match = allMatches.get(i);
             try {
                 Date matchDate = sdf.parse(match.getDate());
                 long matchTime = matchDate.getTime();
+                // Считаем матч текущим, если он начался и идет (в пределах 120 минут от начала)
+                // или если статус указывает, что матч в процессе
                 String status = match.getStatus() != null ? match.getStatus().toLowerCase() : "";
                 if (status.contains("live") || status.contains("in_play") ||
                         (currentTime >= matchTime && currentTime <= matchTime + 120 * 60 * 1000)) {
@@ -188,12 +185,14 @@ public class MainActivity extends BaseActivity {
             }
         }
 
+        // Если текущие матчи найдены, прокручиваем к первому из них
         if (currentMatchPosition != -1) {
             recyclerView.scrollToPosition(currentMatchPosition);
             Log.d("MainActivity", "Scrolled to current match at position: " + currentMatchPosition);
             return;
         }
 
+        // Если текущих матчей нет, прокручиваем к первому будущему матчу
         for (int i = 0; i < allMatches.size(); i++) {
             Match match = allMatches.get(i);
             try {
@@ -208,6 +207,7 @@ public class MainActivity extends BaseActivity {
             }
         }
 
+        // Если нет ни текущих, ни будущих матчей, остаемся в начале списка
         Log.d("MainActivity", "No current or future matches, staying at start");
     }
 
